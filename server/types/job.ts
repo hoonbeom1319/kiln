@@ -23,6 +23,13 @@ export type KilnEvent =
   | (KilnEventBase & { type: 'gate'; name: string; ok: boolean; summary?: string })
   | (KilnEventBase & { type: 'artifact'; path: string; kind?: string })
   | (KilnEventBase & { type: 'warn'; msg: string })
+  | (KilnEventBase & {
+      type: 'revision';
+      version: number;
+      note: string;
+      changed: string[];
+      feedback: string;
+    })
   | (KilnEventBase & { type: 'done'; name?: string; dir?: string })
   | (KilnEventBase & { type: 'error'; msg: string });
 

@@ -24,6 +24,13 @@ export function EventRow({ ev }: { ev: KilnEvent }) {
       );
     case 'artifact':
       return <li className="pl-6 font-mono text-xs text-accent">→ {ev.path}</li>;
+    case 'revision':
+      return (
+        <li className="mt-3 font-semibold text-accent">
+          ✎ v{ev.version} — {ev.note}
+          <span className="font-normal text-muted"> ({ev.changed.length}개 산출물)</span>
+        </li>
+      );
     case 'warn':
       return <li className="whitespace-pre-wrap pl-3 text-warn">⚠ {ev.msg}</li>;
     case 'done':

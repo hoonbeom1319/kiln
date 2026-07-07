@@ -5,7 +5,7 @@ import { buildScreens } from '../build-screens.js';
 import { judgeHiFi } from '../../harness/judge.js';
 import { noteStatus } from '../project.js';
 import { tokensSystem, tokensPrompt, flowSystem, flowPrompt } from '../prompts/design.js';
-import { traceSystem, tracePrompt, traceSchema } from '../prompts/traceability.js';
+import { mapTraceability } from '../traceability.js';
 
 // Stage 2 — 디자인. PRD → tokens.css + 00-flow.md → hi-fi 화면(build) → 독립 검증(judge).
 // Reuses the harness build.js/judge.js (the same code the A/B validated). The design-verifier
@@ -64,51 +64,6 @@ export async function designStage(ctx, { emit, model = 'gemini-flash', judge = '
 
   await noteStatus(ctx.dir, `디자인: tokens + ${build.files.length}화면 (verifier ${verdict.result})`);
   return { files: build.files, verdict, contract, traceability: trace.map };
-}
-
-// Ask the model to map each built screen to the PRD requirement it reflects, then reconcile
-// to exactly the built screens (one entry each, build order) so the gallery never has a
-// screen with no annotation or an annotation for a screen that doesn't exist.
-async function mapTraceability({ model, prd, files }) {
-  const screens = files.map((f) => ({
-    file: f.path.split('/').pop(),
-    title: screenTitle(f.html),
-  }));
-  const res = await generate(tracePrompt(prd, screens), {
-    model,
-    system: traceSystem,
-    schema: traceSchema,
-    maxTokens: 2000,
-  });
-  const byFile = new Map((res.data?.screens || []).map((s) => [String(s.file).split('/').pop(), s]));
-  const mapped = screens.map((s) => {
-    const hit = byFile.get(s.file);
-    return {
-      file: s.file,
-      title: s.title,
-      reflects: (hit?.reflects || '').trim() || '(연결된 PRD 항목 미상)',
-    };
-  });
-  return { map: { screens: mapped }, model: res.model, usage: res.usage, attempts: res.attempts };
-}
-
-// Best-effort human title for a screen: <title>, else first <h1>, else the filename.
-function screenTitle(html) {
-  const t = String(html).match(/<title[^>]*>([\s\S]*?)<\/title>/i);
-  if (t && t[1].trim()) return decodeEntities(t[1].trim());
-  const h = String(html).match(/<h1[^>]*>([\s\S]*?)<\/h1>/i);
-  if (h) return decodeEntities(h[1].replace(/<[^>]+>/g, '').trim());
-  return '';
-}
-
-function decodeEntities(s) {
-  return s
-    .replace(/&amp;/g, '&')
-    .replace(/&lt;/g, '<')
-    .replace(/&gt;/g, '>')
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'")
-    .replace(/\s+/g, ' ');
 }
 
 // Keep only screens that were actually built (basename match), and recompute the result.

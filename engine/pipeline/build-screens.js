@@ -41,6 +41,64 @@ ${contract.tokens}
 
 export async function buildScreens({ model, contract, temperature, maxTokens = 24000 }) {
   const res = await generate(buildPrompt(contract), { model, system: buildSystem, temperature, maxTokens });
+  return parseFiles(res, '빌드 출력에서 <<<FILE …>>> 블록을 찾지 못함');
+}
+
+// --- coherent subset rebuild (revise) ---
+// Regenerate only the named screens, but with the FULL design context so the result stays
+// coherent with everything else: the current tokens/flow/PRD as the contract, the unchanged
+// sibling screens as visual reference (match their language), and each target's current HTML as
+// the base to modify. This is what makes chat-scoped revise keep cross-screen consistency.
+
+export const reviseSystem = `${buildSystem}
+
+[개정 모드] 지금은 기존 제품의 일부 화면만 다시 만든다. 반드시:
+- 함께 주어진 **레퍼런스 화면들의 시각 언어**(레이아웃 규칙·컴포넌트 모양·타이포·간격·상호작용 패턴)와 **일치**시킨다. 튀는 새 스타일을 만들지 마라.
+- 각 대상 화면의 **현재 HTML을 출발점**으로, 개정 지침이 요구하는 부분만 바꾸고 나머지 완성도는 보존한다.
+- 지정된 대상 화면만 출력한다(레퍼런스 화면은 다시 내지 마라).`;
+
+export function revisePrompt({ contract, targets, references, guidance }) {
+  const ref = references.length
+    ? references
+        .map((r) => `<<<REF ${r.path}>>>\n${r.html}\n<<<END>>>`)
+        .join('\n\n')
+    : '(레퍼런스 화면 없음 — 전체 재생성)';
+  const tgt = targets
+    .map((t) => `<<<CURRENT ${t.path}>>>\n${t.html || '(신규 화면 — 새로 작성)'}\n<<<END>>>`)
+    .join('\n\n');
+  return `프로젝트 "${contract.name}"의 일부 화면을 개정한다.
+
+## 개정 지침(무엇을·어떻게)
+${guidance}
+
+## 디자인 토큰(foundation/tokens.css) — 인라인해서 사용
+\`\`\`css
+${contract.tokens}
+\`\`\`
+
+## 흐름 계약(00-flow.md)
+${contract.flow}
+
+## 레퍼런스 화면(이 시각 언어에 맞춰라 — 다시 출력하지 마라)
+${ref}
+
+## 개정 대상 화면(현재 상태 — 이걸 출발점으로 지침대로 고쳐라)
+${tgt}
+
+각 대상 화면을 self-contained hi-fi HTML로, <<<FILE screens/이름.html>>> … <<<END>>> 블록으로만 출력하라.`;
+}
+
+export async function buildRevised({ model, contract, targets, references = [], guidance, temperature, maxTokens = 24000 }) {
+  const res = await generate(revisePrompt({ contract, targets, references, guidance }), {
+    model,
+    system: reviseSystem,
+    temperature,
+    maxTokens,
+  });
+  return parseFiles(res, '개정 출력에서 <<<FILE …>>> 블록을 찾지 못함');
+}
+
+function parseFiles(res, errMsg) {
   const files = [];
   for (const m of res.text.matchAll(FILE_RE)) {
     const path = m[1].trim();
@@ -48,7 +106,7 @@ export async function buildScreens({ model, contract, temperature, maxTokens = 2
     if (path && html) files.push({ path, html });
   }
   if (!files.length) {
-    const err = new Error('빌드 출력에서 <<<FILE …>>> 블록을 찾지 못함');
+    const err = new Error(errMsg);
     err.lastText = res.text;
     throw err;
   }

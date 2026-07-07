@@ -5,10 +5,30 @@ export type {
   KilnEventType,
   StartForgeRequest,
   StartForgeResponse,
+  StartReviseRequest,
+  RollbackRequest,
+  RevisionEntry,
+  RevisionKind,
+  RevisionLog,
   Traceability,
   TraceScreen,
 } from './types';
-export { startForge, jobStreamUrl, artifactUrl, fetchTraceability } from './api';
-export { startForgeMutationOptions, traceabilityQueryOptions } from './factory';
+export {
+  startForge,
+  startRevise,
+  startRollback,
+  jobStreamUrl,
+  artifactUrl,
+  fetchTraceability,
+  fetchRevisions,
+} from './api';
+export {
+  startForgeMutationOptions,
+  reviseMutationOptions,
+  rollbackMutationOptions,
+  traceabilityQueryOptions,
+  revisionsQueryOptions,
+} from './factory';
 export { useJobStream, type JobStream } from './model/use-job-stream';
 export { useTraceability } from './model/use-traceability';
+export { useRevisions } from './model/use-revisions';

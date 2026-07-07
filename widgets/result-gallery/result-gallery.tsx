@@ -5,15 +5,19 @@ import { artifactUrl, useTraceability, type KilnEvent } from '@/entities/job';
 interface ResultGalleryProps {
   name: string;
   events: KilnEvent[];
+  // Bumped after a revision rewrites the screens — appended to iframe URLs to bust the cache so
+  // the gallery shows the new version, not the browser's copy of the old one.
+  refreshKey?: number;
 }
 
 // Widget: the finished-run gallery. Renders each hi-fi screen with a one-line note on which
 // PRD requirement it reflects (from traceability.json). Falls back to the packaged
 // handoff/index.html gallery for older projects that predate traceability.
-export function ResultGallery({ name, events }: ResultGalleryProps) {
+export function ResultGallery({ name, events, refreshKey = 0 }: ResultGalleryProps) {
   const gates = events.filter((e): e is Extract<KilnEvent, { type: 'gate' }> => e.type === 'gate');
   const { data: trace, isLoading } = useTraceability(name);
-  const galleryUrl = artifactUrl(`${name}/handoff/index.html`);
+  const bust = refreshKey ? `?v=${refreshKey}` : '';
+  const galleryUrl = artifactUrl(`${name}/handoff/index.html`) + bust;
 
   return (
     <section className="flex flex-col gap-4 rounded-xl border border-border bg-surface p-4">
@@ -53,7 +57,7 @@ export function ResultGallery({ name, events }: ResultGalleryProps) {
               className="m-0 flex flex-col overflow-hidden rounded-lg border border-border"
             >
               <iframe
-                src={artifactUrl(`${name}/handoff/screens/${s.file}`)}
+                src={artifactUrl(`${name}/handoff/screens/${s.file}`) + bust}
                 title={s.title || s.file}
                 loading="lazy"
                 className="h-[460px] w-full border-0 bg-white"

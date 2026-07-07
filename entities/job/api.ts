@@ -1,4 +1,11 @@
-import type { StartForgeRequest, StartForgeResponse, Traceability } from './types';
+import type {
+  RevisionLog,
+  RollbackRequest,
+  StartForgeRequest,
+  StartForgeResponse,
+  StartReviseRequest,
+  Traceability,
+} from './types';
 
 // BFF calls for the job entity. The SSE stream is consumed via EventSource in
 // model/use-job-stream.ts, not here (fetch can't model a long-lived event stream cleanly).
@@ -33,6 +40,45 @@ export async function fetchTraceability(name: string): Promise<Traceability | nu
   if (!res.ok) return null;
   try {
     return (await res.json()) as Traceability;
+  } catch {
+    return null;
+  }
+}
+
+// Start a chat-style revision. Returns the job id to stream (same stream as forge).
+export async function startRevise(req: StartReviseRequest): Promise<StartForgeResponse> {
+  const res = await fetch('/api/forge/revise', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(req),
+  });
+  if (!res.ok) {
+    const detail = await res.json().catch(() => ({}));
+    throw new Error(detail.error || `개정 시작 실패 (${res.status})`);
+  }
+  return res.json();
+}
+
+// Roll a project back to a past version. Returns the job id to stream.
+export async function startRollback(req: RollbackRequest): Promise<StartForgeResponse> {
+  const res = await fetch('/api/forge/rollback', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(req),
+  });
+  if (!res.ok) {
+    const detail = await res.json().catch(() => ({}));
+    throw new Error(detail.error || `롤백 실패 (${res.status})`);
+  }
+  return res.json();
+}
+
+// Fetch a project's revision thread (revisions.json). Returns null if absent (never revised).
+export async function fetchRevisions(name: string): Promise<RevisionLog | null> {
+  const res = await fetch(artifactUrl(`${name}/revisions.json`));
+  if (!res.ok) return null;
+  try {
+    return (await res.json()) as RevisionLog;
   } catch {
     return null;
   }

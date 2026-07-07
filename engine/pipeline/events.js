@@ -24,6 +24,7 @@ export function createReporter(onEvent) {
 //   gate     { name, ok, summary }         — a code gate ran (lint-prd, lint-handoff, verifier)
 //   artifact { path, kind }                — a file was written
 //   warn     { msg }
+//   revision { version, note, changed, feedback } — a chat-style revise produced a new version
 //   done     { name, dir }                 — pipeline finished
 //   error    { msg }
 
@@ -35,6 +36,7 @@ export function cliPrinter(ev) {
     case 'model':    process.stderr.write(`    ↳ ${ev.stage} via ${ev.model} (${ev.attempts || 1} try, ${(ev.usage?.output ?? 0)} out tok)\n`); break;
     case 'gate':     process.stderr.write(`  ${ev.ok ? '\x1b[32m✓' : '\x1b[31m✗'} gate ${ev.name}\x1b[0m — ${ev.summary || ''}\n`); break;
     case 'artifact': process.stderr.write(`    → ${ev.path}\n`); break;
+    case 'revision': process.stderr.write(`\n\x1b[1m✎ v${ev.version}\x1b[0m — ${ev.note || ''} (${(ev.changed || []).length}개 산출물)\n`); break;
     case 'warn':     process.stderr.write(`  \x1b[33m⚠ ${ev.msg}\x1b[0m\n`); break;
     case 'done':     process.stderr.write(`\n\x1b[1m✓ done\x1b[0m → ${ev.dir}\n`); break;
     case 'error':    process.stderr.write(`\n\x1b[31m✗ ${ev.msg}\x1b[0m\n`); break;

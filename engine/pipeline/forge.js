@@ -7,6 +7,10 @@ import { handoffStage } from './stages/handoff.js';
 //
 // Multi-model hybrid default (DECISIONS.md): cheap flash builds, strong pro judges the
 // final hi-fi. Override per stage via opts.
+/**
+ * @param {{name:string,dir:string,idea?:string}} ctx
+ * @param {{emit:Function, model?:string, judge?:string}} [opts]
+ */
 export async function forge(ctx, { emit, model = 'gemini-flash', judge = 'gemini-pro' } = {}) {
   const prd = await prdStage(ctx, { emit, model });
   const design = await designStage(ctx, { emit, model, judge });
