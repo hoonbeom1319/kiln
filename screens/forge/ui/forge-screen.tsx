@@ -3,6 +3,7 @@
 import { ForgeRun } from '@/features/forge-run';
 import { ProgressStream } from '@/widgets/progress-stream';
 import { ResultGallery } from '@/widgets/result-gallery';
+import { SessionList } from '@/widgets/session-list';
 import { useForgeScreen } from '../model/use-forge-screen';
 
 // Screen: assembles the forge flow — input (feature) → live progress (widget) → gallery
@@ -12,6 +13,10 @@ export function ForgeScreen() {
   const liveResult = stream.status === 'done' && stream.doneName ? stream.doneName : null;
   // Live run's result wins; otherwise show a project reopened via ?project=.
   const resultName = liveResult ?? (!jobId ? reopened : null);
+  // A finished project opened from the list (not a live run) — offer a way back to the list.
+  const isReopen = Boolean(resultName) && !liveResult;
+  // Idle home: no live job and nothing reopened → show the past-projects list.
+  const isIdle = !jobId && !resultName;
 
   return (
     <main className="mx-auto flex min-h-screen max-w-3xl flex-col gap-6 px-4 py-10">
@@ -34,7 +39,15 @@ export function ForgeScreen() {
         </div>
       ) : null}
 
+      {isReopen ? (
+        <a href="/" className="text-sm font-medium text-accent hover:underline">
+          ← 목록
+        </a>
+      ) : null}
+
       {resultName ? <ResultGallery name={resultName} events={stream.events} /> : null}
+
+      {isIdle ? <SessionList /> : null}
     </main>
   );
 }

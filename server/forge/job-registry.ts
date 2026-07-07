@@ -10,6 +10,7 @@
 import { createReporter } from '@/pipeline/events.js';
 import { forge } from '@/pipeline/forge.js';
 import { projectName, scaffold, nowStamp } from '@/pipeline/project.js';
+import { writeSession, countProjectScreens } from '@/server/forge/session-store';
 import type { ForgeResult, JobSnapshot, JobStatus, KilnEvent } from '@/server/types/job';
 
 type Subscriber = (ev: KilnEvent) => void;
@@ -64,6 +65,10 @@ export async function startForge(input: StartForgeInput): Promise<JobRecord> {
   };
   store.set(id, job);
 
+  // Persist the session as soon as the run starts so it shows on the home list while running.
+  // Fire-and-forget: a failed write must never break the run (persistText helper swallows).
+  void persistSession(name, { idea, status: 'running', createdAt: job.createdAt });
+
   // Subscribe to the emit seam: stamp, buffer, fan out.
   const { emit } = createReporter((raw: KilnEvent) => {
     const ev: KilnEvent = { ...raw, t: Date.now() };
@@ -82,19 +87,37 @@ export async function startForge(input: StartForgeInput): Promise<JobRecord> {
   // Fire and forget. The engine reports progress through emit; we only translate the
   // terminal outcome into a final done/error event the stream can close on.
   forge(ctx, { emit, model: input.model || 'gemini-flash', judge: input.judge || 'gemini-pro' })
-    .then((result: ForgeResult) => {
+    .then(async (result: ForgeResult) => {
       job.result = result;
       job.status = 'done';
       emit('done', { name, dir: `projects/${name}` });
+      // Persist the finished session, carrying the full event log for the future revise
+      // engine and the built screen count for the list row.
+      const screenCount = await countProjectScreens(name).catch(() => 0);
+      void persistSession(name, { status: 'done', screenCount, events: job.events });
     })
     .catch((err: unknown) => {
       const msg = err instanceof Error ? err.message : String(err);
       job.error = msg;
       job.status = 'error';
       emit('error', { msg });
+      void persistSession(name, { status: 'error', events: job.events });
     });
 
   return job;
+}
+
+// Persist without ever throwing into the run. Session persistence is best-effort — the
+// forge itself already wrote its artifacts to disk.
+async function persistSession(
+  name: string,
+  patch: Parameters<typeof writeSession>[1],
+): Promise<void> {
+  try {
+    await writeSession(name, patch);
+  } catch {
+    /* a failed session write must not affect the run or its stream */
+  }
 }
 
 export function getJob(id: string): JobRecord | undefined {

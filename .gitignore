@@ -1,11 +1,13 @@
 node_modules/
-runs/
 .env
 .env.local
 *.log
 .DS_Store
 
-projects/
+# Generated output at the repo root only — anchored so it never swallows source dirs like
+# app/api/projects/ (an unanchored `projects/` matches that path too).
+/runs/
+/projects/
 
 # Next.js
 .next/
