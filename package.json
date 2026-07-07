@@ -1,0 +1,23 @@
+{
+  "name": "kiln",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Kiln — provider-abstracted design pipeline. Roadmap ①: Gemini 품질 A/B 하네스 = 프로덕션 모델 스위처.",
+  "bin": {
+    "kiln-ab": "bin/ab.js"
+  },
+  "scripts": {
+    "ab": "node bin/ab.js",
+    "ab:dry": "node bin/ab.js --variants echo,echo"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.30.1",
+    "@google/genai": "^0.14.0"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "author": "polaris (https://github.com/hoonbeom1319)",
+  "license": "MIT"
+}
