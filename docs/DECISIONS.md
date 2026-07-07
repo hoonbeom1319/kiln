@@ -63,6 +63,11 @@ atelier 자산은 두 층으로 나뉜다:
   - `harness/`: atelier `_fixture` PRD/flow/tokens 로드 → variant별 hi-fi BUILD → 공유 심판 JUDGE(design-verifier render-check 7항목 이식) → ok-rate 점수 → `runAB()`가 build→judge→compare→**GO/NO-GO** 리포트를 `runs/<stamp>/`에 기록. CLI: `node bin/ab.js`.
   - 검증: `node bin/ab.js`(echo,echo) 오프라인 end-to-end 통과(fixture→build→judge→score→report). 상세: [`HARNESS.md`](HARNESS.md).
   - **다음: 실키(GEMINI/ANTHROPIC) 넣고 `--variants gemini-pro,opus`로 실측 → GO/NO-GO 판정. 이후 로드맵 ②(LangGraph 포팅) — 이 `generate()`가 노드 모델 프리미티브.**
+- **2026-07-07 (오후)** — 방향 전환: **Gemini만으로 MVP 착수**(Opus vs Gemini 정식 게이트는 Claude 결제 후로 유보). 목적 = 주변 사람에게 "아이디어→기획→디자인→handoff" SaaS 흐름을 체험시키기. 결정: 런타임 API 비용은 무시 가능(run당 센트~$1대) → **슬림 4단계 + 공짜 게이트**로 먼저 끝까지 돌리고, 풀 forge(다수결·리디자인·trend·market)는 나중에 노드 추가로 승격(버리는 코드 0). 전달=로컬/화면공유 먼저, 진행표현=SSE 스트리밍(엔진에 emit seam 심어둠).
+  - **헤드리스 forge 엔진 완성**(`pipeline/`): idea → **PRD**(lint-prd 게이트, 1회 자동개정) → **Design**(tokens.css + 00-flow.md + hi-fi 화면 + design-verifier 독립검증) → **Handoff**(4종 문서 결정론적 생성 + pack-handoff + lint-handoff). stage 조립식 → **무인 `bin/forge.js` + 수동 `bin/plan.js`·`bin/design.js`가 같은 stage 공유**.
+  - 게이트: atelier 포터블 스크립트를 `scripts/*.cjs`로 복사(kiln/projects/ 사용). hi-fi 빌드는 HTML-in-JSON이 flash에서 깨져 **구분자(`<<<FILE>>>`) 포맷**으로 교체(양 모델 견고). 멀티모델 하이브리드 확정: **빌드=flash(싸고 빠름), 최종 판정=pro**(flash 심판은 화면 환각·오탐 → design.js에서 pro 기본 + reconcile 가드).
+  - 실 Gemini 검증 통과: `forge "사내 점심 투표 앱"` → PRD lint PASS · hi-fi 4화면(각 15~22KB, box-shadow/gradient/토큰 166곳, 진짜 hi-fi) · **handoff lint-handoff PASS(self-contained)**. design-verifier는 deadControl로 FAIL(정확한 지적, 데모는 advisory로 계속). 상세 [`HARNESS.md`](HARNESS.md)·`pipeline/`.
+  - **다음: SSE 스트리밍 웹 껍데기(입력→진행→결과 갤러리, 로컬·무인증) → 친구 반응 → 값어치 있으면 풀 게이트 노드 추가.**
 
 ---
 

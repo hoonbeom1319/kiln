@@ -30,20 +30,22 @@ class GeminiProvider extends Provider {
 
   async generateStructured({ system, prompt, schema, model, temperature, maxTokens }) {
     const ai = await getClient();
+    // Version-robust structured output: responseMimeType forces a JSON *body*, and the
+    // schema is handed to the model in-prompt for shape guidance. We deliberately do NOT
+    // pass responseSchema/responseJsonSchema (their support/format differs across
+    // @google/genai versions) — generate() validates the parsed object with our own
+    // validator and repair-retries on any mismatch, so conformance is guaranteed here.
     const res = await ai.models.generateContent({
       model,
-      contents: prompt,
+      contents: `${prompt}\n\nReturn ONLY a JSON value matching this JSON Schema — no prose, no markdown fence:\n${JSON.stringify(schema)}`,
       config: {
         systemInstruction: system,
         temperature,
         maxOutputTokens: maxTokens,
         responseMimeType: 'application/json',
-        responseJsonSchema: schema,
       },
     });
     const text = res.text ?? '';
-    // responseMimeType:'application/json' guarantees a JSON body; generate() still
-    // validates the parsed object and repair-retries on any schema mismatch.
     return { data: JSON.parse(text), text, usage: usageOf(res), raw: res };
   }
 }
