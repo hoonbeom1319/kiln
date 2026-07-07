@@ -34,11 +34,11 @@ export function ChatInput({ value, onChange, onSubmit, pending, error }: ChatInp
         placeholder="예) 전체를 다크 테마로 바꾸고 포인트 컬러를 오렌지로 통일해줘"
         rows={2}
         disabled={pending}
-        className="w-full resize-y rounded-lg border border-border bg-surface p-3 text-text placeholder:text-muted focus:border-accent focus:outline-none disabled:opacity-60"
+        className="w-full resize-y rounded-lg border border-border bg-surface-2 p-3 text-text placeholder:text-muted focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent disabled:opacity-60"
       />
       <div className="flex items-center justify-between">
         <span className="text-xs text-muted">⌘/Ctrl + Enter로 전송</span>
-        <Button type="submit" disabled={pending || !value.trim()}>
+        <Button type="submit" size="sm" disabled={pending || !value.trim()}>
           {pending ? '다시 굽는 중…' : '수정 요청'}
         </Button>
       </div>

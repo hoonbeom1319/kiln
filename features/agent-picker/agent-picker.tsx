@@ -21,12 +21,12 @@ export function AgentPicker({ value, onChange, disabled }: AgentPickerProps) {
     if (!value && available.length) onChange(available[0].alias);
   }, [value, available, onChange]);
 
-  if (isLoading) return <p className="text-xs text-muted">로컬 에이전트 감지 중…</p>;
+  if (isLoading) return <p className="text-xs text-muted">실행 모델 감지 중…</p>;
 
   if (!available.length) {
     return (
       <p className="text-xs text-warn">
-        설치된 로컬 에이전트가 없습니다 — <code className="font-mono">claude</code> 또는{' '}
+        실행할 모델이 없습니다 — <code className="font-mono">claude</code> 또는{' '}
         <code className="font-mono">codex</code> CLI를 설치하세요. 실행은 당신의 구독으로, 운영자 비용 0.
       </p>
     );
@@ -34,12 +34,12 @@ export function AgentPicker({ value, onChange, disabled }: AgentPickerProps) {
 
   return (
     <label className="flex items-center gap-2 text-xs text-muted">
-      실행 에이전트
+      실행 모델
       <select
         value={value ?? ''}
         onChange={(e) => onChange(e.target.value)}
         disabled={disabled}
-        className="rounded border border-border bg-surface px-2 py-1 text-text focus:border-accent focus:outline-none disabled:opacity-60"
+        className="rounded-md border border-border bg-surface-2 px-2 py-1 text-text focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent disabled:opacity-60"
       >
         {agents.map((a) => (
           <option key={a.alias} value={a.alias} disabled={!a.available}>

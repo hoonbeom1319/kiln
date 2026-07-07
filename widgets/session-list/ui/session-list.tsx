@@ -25,23 +25,27 @@ export function SessionList() {
   }
 
   return (
-    <section className="flex flex-col gap-2">
-      <h2 className="px-1 text-sm font-semibold text-muted">이전 프로젝트</h2>
-      <ul className="flex flex-col gap-2">
+    <section className="flex flex-col gap-3">
+      <h2 className="px-1 text-sm font-semibold text-muted">
+        이전 프로젝트 <span className="text-muted/60">· {sessions.length}</span>
+      </h2>
+      <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {sessions.map((s) => (
           <li key={s.name}>
             <a
               href={`/?project=${encodeURIComponent(s.name)}`}
-              className="flex items-center gap-3 rounded-xl border border-border bg-surface px-4 py-3 transition-colors hover:border-accent"
+              className="flex h-full flex-col justify-between gap-3 rounded-xl border border-border bg-surface p-4 transition-colors hover:border-accent hover:bg-surface-2"
             >
-              <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-                <span className="truncate text-sm font-medium">{s.idea || s.name}</span>
-                <span className="text-xs text-muted">
+              <span className="line-clamp-2 text-sm font-medium leading-snug">
+                {s.idea || s.name}
+              </span>
+              <div className="flex items-center justify-between gap-2">
+                <span className="truncate text-xs text-muted">
                   {relativeTime(s.updatedAt)}
                   {s.screenCount > 0 ? ` · 화면 ${s.screenCount}개` : ''}
                 </span>
+                <StatusPill status={s.status} />
               </div>
-              <StatusPill status={s.status} />
             </a>
           </li>
         ))}

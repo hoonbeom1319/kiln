@@ -6,6 +6,7 @@ import {
   useRevisions,
   type RevisionEntry,
 } from '@/entities/job';
+import { cn } from '@/shared/lib';
 
 interface ReviseThreadProps {
   name: string;
@@ -62,7 +63,12 @@ function Turn({
   onRestore: () => void;
 }) {
   return (
-    <li className="flex flex-col gap-1.5 rounded-lg border border-border bg-surface p-3">
+    <li
+      className={cn(
+        'flex flex-col gap-1.5 rounded-lg border p-3',
+        isHead ? 'border-accent/40 bg-accent/[0.06]' : 'border-border bg-surface-2',
+      )}
+    >
       <div className="flex items-center justify-between">
         <span className="flex items-center gap-2 text-sm font-semibold">
           <span className="rounded bg-border/60 px-1.5 py-0.5 text-xs text-text">v{entry.version}</span>

@@ -2,34 +2,52 @@
 @tailwind components;
 @tailwind utilities;
 
+/*
+ * Kiln design tokens — "the kiln" mood: warm neutrals throughout (no pure greys), an ember
+ * accent that carries the baking metaphor, and layering by surface brightness rather than heavy
+ * shadow (so dark mode reads as depth, not as a wireframe). Dark is the default; light is a
+ * warm ceramic-glaze theme via prefers-color-scheme. `--surface-2` is a raised layer; state
+ * colours (ok/warn/danger) are shifted warm to sit in the same family.
+ */
 :root {
   --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, 'Apple SD Gothic Neo',
     'Noto Sans KR', sans-serif;
+  /* Serif for the human input (idea / PRD quotes) — "hand-shaped" against the precise tool sans. */
+  --font-serif: 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, 'Noto Serif KR', serif;
 
-  --canvas: #0f1115;
-  --surface: #16181d;
-  --border: #2a2d34;
-  --text: #e8eaed;
-  --muted: #9aa0a6;
-  --accent: #6ea8fe;
-  --accent-on: #0b1220;
-  --ok: #4ade80;
-  --warn: #fbbf24;
-  --danger: #f87171;
+  --radius: 0.75rem; /* 12px — cards/containers. Previews use 0.5rem, buttons 0.375rem. */
+
+  /* Dark — inside the kiln. Warm-shifted near-blacks. */
+  --canvas: #0e0d0c;
+  --surface: #1a1815;
+  --surface-2: #221f1a; /* raised layer (thumbnails, inset rows) */
+  --border: #302b24;
+  --text: #ede8e1; /* bone-china white, not pure #fff */
+  --muted: #9c948a;
+  --accent: #e2703a; /* ember / terracotta — the firing heat */
+  --accent-hover: #f2874f;
+  --accent-on: #1a0e07; /* deep warm ink for text on ember */
+  --glow: rgba(226, 112, 58, 0.18); /* kiln glow behind the running state */
+  --ok: #6fb98f; /* celadon green — "cooled / set" */
+  --warn: #e0a458;
+  --danger: #d5604d;
 }
 
 @media (prefers-color-scheme: light) {
   :root {
-    --canvas: #f7f8fa;
+    --canvas: #f6f2ec; /* ceramic glaze white */
     --surface: #ffffff;
-    --border: #e4e6eb;
-    --text: #1a1c20;
-    --muted: #60646c;
-    --accent: #2563eb;
+    --surface-2: #faf6f0;
+    --border: #e7ded2;
+    --text: #211c16;
+    --muted: #6e655b;
+    --accent: #c85a2b; /* deeper ember for contrast on light */
+    --accent-hover: #b24e22;
     --accent-on: #ffffff;
-    --ok: #16a34a;
-    --warn: #b45309;
-    --danger: #dc2626;
+    --glow: rgba(200, 90, 43, 0.12);
+    --ok: #3f8f63;
+    --warn: #b0771f;
+    --danger: #c4462f;
   }
 }
 
@@ -40,8 +58,45 @@ body {
   background: var(--canvas);
   color: var(--text);
   font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
 * {
   box-sizing: border-box;
+}
+
+::selection {
+  background: var(--accent);
+  color: var(--accent-on);
+}
+
+/* Kiln glow — a soft ember halo behind whatever is actively "baking" (running state). */
+@keyframes kiln-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 1px var(--border), 0 0 24px -6px var(--glow);
+  }
+  50% {
+    box-shadow: 0 0 0 1px var(--accent), 0 0 40px -4px var(--glow);
+  }
+}
+
+.kiln-glow {
+  animation: kiln-pulse 2.4s ease-in-out infinite;
+}
+
+/* Ember dot that breathes while a job streams. */
+@keyframes ember-breathe {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.ember-breathe {
+  animation: ember-breathe 1.4s ease-in-out infinite;
 }

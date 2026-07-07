@@ -28,11 +28,11 @@ export function ForgeForm({ value, onChange, onSubmit, pending, error }: ForgeFo
         placeholder="예) 사내 점심 투표 앱"
         rows={3}
         disabled={pending}
-        className="w-full resize-y rounded-lg border border-border bg-surface p-3 text-text placeholder:text-muted focus:border-accent focus:outline-none disabled:opacity-60"
+        className="w-full resize-y rounded-lg border border-border bg-surface-2 p-3.5 font-serif text-lg text-text placeholder:font-sans placeholder:text-base placeholder:text-muted focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent disabled:opacity-60"
       />
       <div className="flex justify-end">
         <Button type="submit" disabled={pending || !value.trim()}>
-          {pending ? '가마에 불 붙이는 중…' : 'Forge 시작'}
+          {pending ? '🔥 가마에 불 붙이는 중…' : 'Forge 시작'}
         </Button>
       </div>
       {error ? <p className="text-sm text-danger">{error}</p> : null}
