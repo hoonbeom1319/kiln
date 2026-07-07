@@ -30,8 +30,9 @@ metadata:
 
 **로컬 에이전트 provider(claude-code)로 forge 완주·품질 우위 실측(2026-07-07)** → [[kiln-model-strategy]] BYO 노선. 웹 POST에 `{model:'claude-code'}`면 로컬 Opus로 굽고 운영자 비용 0.
 
-**다음(빌드 순서) — ① 세션 영속 재개(진행할 구체 설계, 리셋 대비 고정):**
-- **server**: `server/forge/session-store.ts` — `writeSession(name,patch)`/`readSession(name)`/`listSessions()`, `projects/<name>/session.json`(name·idea·status·createdAt·updatedAt·screenCount, 완료 시 events 포함). session.json 없는 옛 프로젝트(lunchvote·runcrew·proj-*)는 **합성**(idea.txt + handoff/index.html 유무로 status, dir mtime로 시각). `server/controllers/project-controller.ts`(fetchSessions/fetchSession). BFF `app/api/projects/route.ts`(GET 목록 — 기존 `[...path]` 산출물 라우트와 세그먼트 분리돼 공존). `server/forge/job-registry.ts`가 start(running)·done·error에 `writeSession`(+완료 시 events·screenCount).
-- **client(FSD)**: `entities/project`(SessionMeta 타입·`fetchSessions` api·`sessionsQueryOptions`·`use-sessions`·index) → `widgets/session-list`(홈 목록: idea·status pill·상대시각·화면수, `?project=<name>` 링크, 빈 상태) → `screens/forge` 통합(idle→목록, reopen→갤러리+"← 목록"). reopen(`?project=`)은 이미 있음.
-- 그다음 **② 채팅형 revise 엔진**(전역 컨텍스트 인지 재생성+버전). traceability는 revise의 요구사항↔화면 동기화 근거로 이미 준비됨.
+**① 세션 영속 완료·검증됨(2026-07-07 밤3).** "세션"=제품 프로젝트(idea·status·버전·이벤트)이지 Claude Code 터미널 세션(개발자 대화)이 아니다 — `claude-code` provider가 로컬(그것도 `--max-turns 1` 무상태)이라 실행이 사용자 머신에서 돌아도 제품이 프로젝트를 기억하는 건 자동이 아니라 별도 기능. 구현: `server/forge/session-store.ts`(`writeSession` merge+createdAt 보존·`readSession`·`listSessions`, session.json 없는 옛 프로젝트는 idea.txt·handoff/index.html·dir stat로 **합성**) → `project-controller`(§9) → BFF `GET /api/projects`(기존 `[...path]`와 공존). job-registry가 start/done/error에 best-effort writeSession(완료 시 events·screenCount). 클라: `entities/project`(SessionMeta·useSessions) → `widgets/session-list`(idea·status pill·상대시각·화면수·`?project=` 링크) → `screens/forge`(idle→목록, reopen→갤러리+"← 목록"). **버그 fix**: 미앵커 `.gitignore` `projects/`가 `app/api/projects/`까지 삼켜 기존 `[...path]/route.ts`가 untracked였음 → `/projects/`·`/runs/` 앵커로 수정.
+
+**엔진 `/engine` 재배치(2026-07-07 밤3, 별도 커밋) — 위 "엔진 churn 0" 원칙을 의식적으로 되돌림.** 웹 착수 땐 churn 0이 옳았지만 웹이 안정된 지금은 루트 명료성이 이김. `src`→**`engine/model`**(generate·config·provider·schema + `providers/` 어댑터. src는 모호했고 안에 providers/가 있어 model이 맞음), `pipeline`→`engine/pipeline`, `harness`→`engine/harness`. **`bin`·`scripts`는 루트 유지**(npm bin 관례·공용 게이트). 경로는 전부 cwd 상대라 scripts/runs/projects/.env 무영향. 웹 소비자는 `@/engine/pipeline`(3파일)뿐. 검증: tsc(신규 0)·`ab:dry` PASS·웹 200·브라우저.
+
+**다음 — ② 채팅형 revise 엔진**(전역 컨텍스트 인지 재생성+버전). traceability·session events 이미 준비됨.
 - 관련 [[kiln-mvp-pipeline]]·[[kiln-roadmap]]·[[kiln-model-strategy]].

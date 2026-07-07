@@ -13,7 +13,7 @@
 //   --epsilon n        ok-rate tolerance for GO       (default 0)
 //   --out dir          run root                       (default runs)
 
-import { runAB } from '../harness/ab.js';
+import { runAB } from '../engine/harness/ab.js';
 
 function parseArgs(argv) {
   const out = {};

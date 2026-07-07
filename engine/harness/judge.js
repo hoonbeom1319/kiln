@@ -1,4 +1,4 @@
-import { generate } from '../src/generate.js';
+import { generate } from '../model/generate.js';
 import { VERDICT_SCHEMA } from './schemas.js';
 import { judgeSystem, judgePrompt } from './prompts.js';
 

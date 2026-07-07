@@ -7,9 +7,9 @@
 // A job is lost on server restart — fine for a local/screen-share demo. Swap this module
 // for a queue + store when tenants and durability arrive.
 
-import { createReporter } from '@/pipeline/events.js';
-import { forge } from '@/pipeline/forge.js';
-import { projectName, scaffold, nowStamp } from '@/pipeline/project.js';
+import { createReporter } from '@/engine/pipeline/events.js';
+import { forge } from '@/engine/pipeline/forge.js';
+import { projectName, scaffold, nowStamp } from '@/engine/pipeline/project.js';
 import { writeSession, countProjectScreens } from '@/server/forge/session-store';
 import type { ForgeResult, JobSnapshot, JobStatus, KilnEvent } from '@/server/types/job';
 

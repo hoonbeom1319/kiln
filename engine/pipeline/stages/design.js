@@ -1,6 +1,6 @@
 import { mkdir, writeFile, readFile } from 'node:fs/promises';
 import { join, dirname } from 'node:path';
-import { generate } from '../../src/generate.js';
+import { generate } from '../../model/generate.js';
 import { buildScreens } from '../build-screens.js';
 import { judgeHiFi } from '../../harness/judge.js';
 import { noteStatus } from '../project.js';

@@ -1,4 +1,4 @@
-import { generate } from '../src/generate.js';
+import { generate } from '../model/generate.js';
 import { BUILD_SCHEMA } from './schemas.js';
 import { buildSystem, buildPrompt } from './prompts.js';
 

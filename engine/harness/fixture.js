@@ -1,6 +1,6 @@
 import { readFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
-import { DEFAULTS } from '../src/config.js';
+import { DEFAULTS } from '../model/config.js';
 
 // Load the atelier _fixture contract — the same PRD/flow/tokens that every variant in an
 // A/B run must satisfy. Reading straight from ../atelier means the harness measures

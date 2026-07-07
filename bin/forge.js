@@ -3,9 +3,9 @@
 //
 //   node bin/forge.js "<아이디어>" [--name slug] [--model gemini-flash] [--judge gemini-pro]
 
-import { createReporter, cliPrinter } from '../pipeline/events.js';
-import { projectName, scaffold, nowStamp } from '../pipeline/project.js';
-import { forge } from '../pipeline/forge.js';
+import { createReporter, cliPrinter } from '../engine/pipeline/events.js';
+import { projectName, scaffold, nowStamp } from '../engine/pipeline/project.js';
+import { forge } from '../engine/pipeline/forge.js';
 
 function parse(argv) {
   const args = { _: [] };

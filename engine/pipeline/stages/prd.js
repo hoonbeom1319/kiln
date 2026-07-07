@@ -1,6 +1,6 @@
 import { writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import { generate } from '../../src/generate.js';
+import { generate } from '../../model/generate.js';
 import { runGate, gateSummary } from '../gates.js';
 import { noteStatus } from '../project.js';
 import { prdSystem, prdPrompt } from '../prompts/prd.js';

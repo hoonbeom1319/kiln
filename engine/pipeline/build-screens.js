@@ -1,4 +1,4 @@
-import { generate } from '../src/generate.js';
+import { generate } from '../model/generate.js';
 
 // Hi-fi builder for the pipeline. Unlike the A/B harness (which embeds HTML in JSON via
 // structured output — robust only on strong models), this uses a delimiter format so the

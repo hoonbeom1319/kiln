@@ -10,7 +10,7 @@
 import { readdir, readFile, writeFile, stat } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
-import { PROJECTS_ROOT } from '@/pipeline/project.js';
+import { PROJECTS_ROOT } from '@/engine/pipeline/project.js';
 import type { SessionMeta, SessionRecord } from '@/server/types/session';
 
 function sessionPath(name: string): string {

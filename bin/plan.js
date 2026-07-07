@@ -3,9 +3,9 @@
 //
 //   node bin/plan.js "<아이디어>" [--name slug] [--model gemini-pro|gemini-flash]
 
-import { createReporter, cliPrinter } from '../pipeline/events.js';
-import { projectName, scaffold, nowStamp } from '../pipeline/project.js';
-import { prdStage } from '../pipeline/stages/prd.js';
+import { createReporter, cliPrinter } from '../engine/pipeline/events.js';
+import { projectName, scaffold, nowStamp } from '../engine/pipeline/project.js';
+import { prdStage } from '../engine/pipeline/stages/prd.js';
 
 function parse(argv) {
   const args = { _: [] };

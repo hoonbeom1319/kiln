@@ -3,9 +3,9 @@
 //
 //   node bin/design.js <project> [--model gemini-pro] [--judge gemini-pro]
 
-import { createReporter, cliPrinter } from '../pipeline/events.js';
-import { loadProject } from '../pipeline/project.js';
-import { designStage } from '../pipeline/stages/design.js';
+import { createReporter, cliPrinter } from '../engine/pipeline/events.js';
+import { loadProject } from '../engine/pipeline/project.js';
+import { designStage } from '../engine/pipeline/stages/design.js';
 
 function parse(argv) {
   const args = { _: [] };

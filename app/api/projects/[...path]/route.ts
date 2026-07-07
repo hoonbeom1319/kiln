@@ -1,6 +1,6 @@
 import { readFile, stat } from 'node:fs/promises';
 import { join, normalize, extname } from 'node:path';
-import { PROJECTS_ROOT } from '@/pipeline/project.js';
+import { PROJECTS_ROOT } from '@/engine/pipeline/project.js';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';

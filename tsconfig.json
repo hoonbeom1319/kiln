@@ -31,9 +31,7 @@
     "node_modules",
     "projects",
     "runs",
-    "harness",
-    "src",
-    "pipeline",
+    "engine",
     "scripts",
     "bin"
   ]
