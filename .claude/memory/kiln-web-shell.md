@@ -28,4 +28,10 @@ metadata:
 
 **PRD↔화면 traceability + 주석 갤러리 구현·검증됨(2026-07-07 밤)**: designStage 끝 pass가 화면당 `reflects` 1~2줄 → `traceability.json`(스트리밍). 웹 `result-gallery`=화면별 iframe+"PRD 반영" 주석 그리드(없으면 handoff/index.html 폴백). `entities/job`에 `useTraceability`. **`?project=<name>` 재열기**(세션 재열기 down payment)도 추가.
 
-**다음(빌드 순서)**: ① 세션 영속(`projects/<name>/`에 대화 스레드+버전+이벤트 저장, 홈 목록·정식 재열기) → ② 채팅형 revise 엔진(전역 컨텍스트 인지 재생성+버전). traceability는 revise의 요구사항↔화면 동기화 근거로 이미 준비됨. 관련 [[kiln-mvp-pipeline]]·[[kiln-roadmap]].
+**로컬 에이전트 provider(claude-code)로 forge 완주·품질 우위 실측(2026-07-07)** → [[kiln-model-strategy]] BYO 노선. 웹 POST에 `{model:'claude-code'}`면 로컬 Opus로 굽고 운영자 비용 0.
+
+**다음(빌드 순서) — ① 세션 영속 재개(진행할 구체 설계, 리셋 대비 고정):**
+- **server**: `server/forge/session-store.ts` — `writeSession(name,patch)`/`readSession(name)`/`listSessions()`, `projects/<name>/session.json`(name·idea·status·createdAt·updatedAt·screenCount, 완료 시 events 포함). session.json 없는 옛 프로젝트(lunchvote·runcrew·proj-*)는 **합성**(idea.txt + handoff/index.html 유무로 status, dir mtime로 시각). `server/controllers/project-controller.ts`(fetchSessions/fetchSession). BFF `app/api/projects/route.ts`(GET 목록 — 기존 `[...path]` 산출물 라우트와 세그먼트 분리돼 공존). `server/forge/job-registry.ts`가 start(running)·done·error에 `writeSession`(+완료 시 events·screenCount).
+- **client(FSD)**: `entities/project`(SessionMeta 타입·`fetchSessions` api·`sessionsQueryOptions`·`use-sessions`·index) → `widgets/session-list`(홈 목록: idea·status pill·상대시각·화면수, `?project=<name>` 링크, 빈 상태) → `screens/forge` 통합(idle→목록, reopen→갤러리+"← 목록"). reopen(`?project=`)은 이미 있음.
+- 그다음 **② 채팅형 revise 엔진**(전역 컨텍스트 인지 재생성+버전). traceability는 revise의 요구사항↔화면 동기화 근거로 이미 준비됨.
+- 관련 [[kiln-mvp-pipeline]]·[[kiln-roadmap]]·[[kiln-model-strategy]].

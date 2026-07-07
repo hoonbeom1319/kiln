@@ -4,3 +4,4 @@
 import './echo.js';
 import './gemini.js';
 import './claude.js';
+import './claude-code.js';
