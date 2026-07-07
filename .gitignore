@@ -6,3 +6,8 @@ runs/
 .DS_Store
 
 projects/
+
+# Next.js
+.next/
+next-env.d.ts
+tsconfig.tsbuildinfo

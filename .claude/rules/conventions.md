@@ -24,7 +24,7 @@
 Next.js App Router와 FSD를 결합한다. FSD 최상위는 `application`(전역 Provider·앱 전역 설정)이고, Next의 `app/`은 그 위에서 **라우팅만** 담당하는 호스트다. 실제 화면은 FSD의 `screens/`가 담당한다.
 
 ```
-src/
+/
 ├── application/          # FSD 최상위 레이어 — 전역 Provider·앱 전역 설정·root 조립 (§2.2)
 │   └── providers.tsx     # QueryClientProvider · store · theme ('use client')
 │
