@@ -7,7 +7,7 @@ import { prdSystem, prdPrompt } from '../prompts/prd.js';
 
 // Stage 1 — 기획. idea → PRD.md, gated by lint-prd (blocking, one repair on failure).
 // Shared by `kiln plan` (manual) and `kiln forge` (unattended): same function, same gate.
-export async function prdStage(ctx, { emit, model = 'gemini-pro', maxTokens = 12000 } = {}) {
+export async function prdStage(ctx, { emit, model = 'claude-code', maxTokens = 12000 } = {}) {
   emit('phase', { name: 'PRD' });
   const prdPath = join(ctx.dir, 'PRD.md');
 

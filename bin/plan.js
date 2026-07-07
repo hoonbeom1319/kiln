@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Manual mode — 기획만. idea → PRD.md (+ lint-prd gate).
 //
-//   node bin/plan.js "<아이디어>" [--name slug] [--model gemini-pro|gemini-flash]
+//   node bin/plan.js "<아이디어>" [--name slug] [--model claude-code|codex]
 
 import { createReporter, cliPrinter } from '../engine/pipeline/events.js';
 import { projectName, scaffold, nowStamp } from '../engine/pipeline/project.js';
@@ -20,14 +20,14 @@ function parse(argv) {
 async function main() {
   const args = parse(process.argv.slice(2));
   const idea = args._.join(' ').trim();
-  if (!idea) { console.error('사용법: node bin/plan.js "<아이디어>" [--name slug] [--model gemini-pro]'); process.exit(1); }
+  if (!idea) { console.error('사용법: node bin/plan.js "<아이디어>" [--name slug] [--model claude-code|codex]'); process.exit(1); }
 
   const { emit } = createReporter(cliPrinter);
   const name = projectName(idea, args.name, nowStamp());
   const ctx = await scaffold({ name, idea });
   emit('step', { msg: `프로젝트: ${name}` });
 
-  const model = args.model || 'gemini-pro';
+  const model = args.model || 'claude-code';
   const r = await prdStage(ctx, { emit, model });
   emit('done', { name, dir: `projects/${name}` });
   process.exit(r.gate ? 0 : 2);

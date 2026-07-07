@@ -65,9 +65,12 @@ export async function startForge(input: StartForgeInput): Promise<JobRecord> {
   const emit = attachReporter(job);
   emit('step', { msg: `프로젝트: ${name} — "${idea}"` });
 
+  // The selected local agent (BYO) does every role — build and judge. Default to claude-code.
+  const agent = input.model || 'claude-code';
+
   // Fire and forget. The engine reports progress through emit; we only translate the
   // terminal outcome into a final done/error event the stream can close on.
-  forge(ctx, { emit, model: input.model || 'gemini-flash', judge: input.judge || 'gemini-pro' })
+  forge(ctx, { emit, model: agent, judge: input.judge || agent })
     .then(async (result: ForgeResult) => {
       job.result = result;
       job.status = 'done';
@@ -106,11 +109,12 @@ export async function startRevise(input: StartReviseInput): Promise<JobRecord> {
   const emit = attachReporter(job);
   emit('step', { msg: `개정: ${input.name} — "${feedback}"` });
 
+  const agent = input.model || 'claude-code';
   reviseStage(ctx, {
     feedback,
     emit,
-    model: input.model || 'gemini-flash',
-    planner: input.planner || 'gemini-pro',
+    model: agent,
+    planner: input.planner || agent,
   })
     .then(async (r: { version: number }) => {
       job.result = { name: input.name, dir: `projects/${input.name}`, prdGate: true, verdict: `v${r.version}`, handoffGate: true };

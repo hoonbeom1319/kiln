@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Manual mode — 디자인만. 기존 프로젝트(PRD.md 있음)에 tokens + hi-fi + 독립검증.
 //
-//   node bin/design.js <project> [--model gemini-pro] [--judge gemini-pro]
+//   node bin/design.js <project> [--model claude-code|codex] [--judge …]
 
 import { createReporter, cliPrinter } from '../engine/pipeline/events.js';
 import { loadProject } from '../engine/pipeline/project.js';
@@ -20,11 +20,12 @@ function parse(argv) {
 async function main() {
   const args = parse(process.argv.slice(2));
   const name = args._[0];
-  if (!name) { console.error('사용법: node bin/design.js <project> [--model gemini-pro] [--judge gemini-pro]'); process.exit(1); }
+  if (!name) { console.error('사용법: node bin/design.js <project> [--model claude-code|codex] [--judge …]'); process.exit(1); }
 
   const { emit } = createReporter(cliPrinter);
   const ctx = await loadProject(name);
-  await designStage(ctx, { emit, model: args.model || 'gemini-pro', judge: args.judge || 'gemini-pro' });
+  const agent = args.model || 'claude-code';
+  await designStage(ctx, { emit, model: agent, judge: args.judge || agent });
   emit('done', { name, dir: `projects/${name}` });
 }
 

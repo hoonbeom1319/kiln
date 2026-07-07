@@ -1,8 +1,8 @@
 import { Provider, registerProvider } from '../provider.js';
 
 // Offline mock provider. Emits a schema-shaped stub so validation passes and the whole
-// build → judge → compare pipeline runs end-to-end with no API key. Use it to smoke-test
-// wiring; swap `--variants echo,echo` for `gemini-pro,opus` once keys are set.
+// build → judge → compare pipeline runs end-to-end with no key/agent. Use it to smoke-test
+// wiring; swap `--variants echo,echo` for `claude-code,codex` once a local agent is installed.
 class EchoProvider extends Provider {
   constructor() {
     super('echo');

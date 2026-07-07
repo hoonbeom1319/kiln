@@ -11,7 +11,7 @@ import { scoreVerdict } from './score.js';
 // production model-switcher; the only throwaway is the fixture wiring.
 //
 // @param {object} cfg
-// @param {string[]} cfg.variants     model aliases to compare (e.g. ['gemini-pro','opus'])
+// @param {string[]} cfg.variants     model aliases to compare (e.g. ['claude-code','codex'])
 // @param {string}   [cfg.baseline]   the incumbent to beat (default 'opus')
 // @param {string}   [cfg.judge]      model that scores every variant (default 'opus')
 // @param {string}   [cfg.fixtureName]

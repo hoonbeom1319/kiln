@@ -8,12 +8,10 @@ import { tokensSystem, tokensPrompt, flowSystem, flowPrompt } from '../prompts/d
 import { mapTraceability } from '../traceability.js';
 
 // Stage 2 — 디자인. PRD → tokens.css + 00-flow.md → hi-fi 화면(build) → 독립 검증(judge).
-// Reuses the harness build.js/judge.js (the same code the A/B validated). The design-verifier
-// gate is advisory for the MVP demo — a FAIL records rework notes but does not block.
-// judge defaults to gemini-pro even when build uses flash: final judgment is where a weak
-// model visibly fails (hallucinated screens, false "thin"). This is the multi-model hybrid
-// DECISIONS.md calls for — cheap model builds, strong model judges.
-export async function designStage(ctx, { emit, model = 'gemini-flash', judge = 'gemini-pro' } = {}) {
+// Reuses the harness build.js/judge.js. The design-verifier gate is advisory for the MVP demo
+// — a FAIL records rework notes but does not block. Default model = judge = the user's local
+// agent (BYO); pass a different judge only for a hosted A/B comparison.
+export async function designStage(ctx, { emit, model = 'claude-code', judge = 'claude-code' } = {}) {
   emit('phase', { name: 'Design' });
   const prd = await readFile(join(ctx.dir, 'PRD.md'), 'utf8');
 

@@ -28,7 +28,7 @@ import {
  * @param {{name:string,dir:string,idea?:string}} ctx
  * @param {{feedback:string, emit:Function, model?:string, planner?:string}} opts
  */
-export async function reviseStage(ctx, { feedback, emit, model = 'gemini-flash', planner = 'gemini-pro' } = {}) {
+export async function reviseStage(ctx, { feedback, emit, model = 'claude-code', planner = 'claude-code' } = {}) {
   emit('phase', { name: 'Revise' });
   emit('step', { msg: `피드백: "${feedback}"` });
 

@@ -9,13 +9,15 @@ interface ReviseChatProps {
   name: string; // the project being revised
   // Lifts the started revise job id up to the screen, which streams progress + refreshes on done.
   onStarted: (jobId: string) => void;
+  // The local BYO agent to run the revision on (chosen in the picker).
+  agent: string | null;
   disabled?: boolean;
 }
 
 // Feature root (conventions.md §5): owns the feedback input + revise action, calls the entity
 // mutation, hands the started job id upward. Thin — ChatInput is the presentation. Chat scope is
 // the whole project (not a single screen) so a revision keeps cross-screen coherence.
-export function ReviseChat({ name, onStarted, disabled }: ReviseChatProps) {
+export function ReviseChat({ name, onStarted, agent, disabled }: ReviseChatProps) {
   const [feedback, setFeedback] = useState('');
 
   const mutation = useMutation({
@@ -29,7 +31,7 @@ export function ReviseChat({ name, onStarted, disabled }: ReviseChatProps) {
   const submit = () => {
     const trimmed = feedback.trim();
     if (!trimmed) return;
-    mutation.mutate({ name, feedback: trimmed });
+    mutation.mutate({ name, feedback: trimmed, ...(agent ? { model: agent } : {}) });
   };
 
   return (

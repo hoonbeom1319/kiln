@@ -1,5 +1,6 @@
 'use client';
 
+import { AgentPicker } from '@/features/agent-picker';
 import { ForgeRun } from '@/features/forge-run';
 import { ReviseChat } from '@/features/revise-chat';
 import { ProgressStream } from '@/widgets/progress-stream';
@@ -45,8 +46,16 @@ export function ForgeScreen() {
           />
 
           <section className="flex flex-col gap-4 rounded-xl border border-border bg-surface p-4">
-            <h2 className="text-sm font-semibold">수정 · 버전</h2>
-            <ReviseChat name={m.galleryName as string} onStarted={m.startRevise} disabled={reviseRunning} />
+            <div className="flex items-center justify-between">
+              <h2 className="text-sm font-semibold">수정 · 버전</h2>
+              <AgentPicker value={m.agent} onChange={m.setAgent} disabled={reviseRunning} />
+            </div>
+            <ReviseChat
+              name={m.galleryName as string}
+              onStarted={m.startRevise}
+              agent={m.agent}
+              disabled={reviseRunning}
+            />
 
             {reviseRunning || (hasJob && m.activeKind === 'revise') ? (
               <div className="h-[38vh] min-h-[240px]">
@@ -59,8 +68,11 @@ export function ForgeScreen() {
         </>
       ) : (
         <>
-          <div className="rounded-xl border border-border bg-surface p-4">
-            <ForgeRun onStarted={m.startForge} disabled={running} />
+          <div className="flex flex-col gap-3 rounded-xl border border-border bg-surface p-4">
+            <div className="flex justify-end">
+              <AgentPicker value={m.agent} onChange={m.setAgent} disabled={running} />
+            </div>
+            <ForgeRun onStarted={m.startForge} agent={m.agent} disabled={running} />
           </div>
 
           {hasJob ? (

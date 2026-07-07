@@ -16,6 +16,9 @@ export interface ForgeScreenModel {
   // Bumped on a revise/rollback done to cache-bust the gallery iframes (screens were rewritten).
   refreshKey: number;
   isReopen: boolean;
+  // The local BYO agent that runs forge/revise (chosen in the picker). Passed as `model`.
+  agent: string | null;
+  setAgent: (alias: string) => void;
   startForge: (jobId: string) => void;
   startRevise: (jobId: string) => void;
 }
@@ -30,6 +33,7 @@ export function useForgeScreen(): ForgeScreenModel {
   const [galleryName, setGalleryName] = useState<string | null>(null);
   const [reopened, setReopened] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [agent, setAgent] = useState<string | null>(null);
   const stream = useJobStream(jobId);
   const queryClient = useQueryClient();
   const handledDone = useRef<string | null>(null); // jobId whose terminal state we've processed
@@ -63,6 +67,8 @@ export function useForgeScreen(): ForgeScreenModel {
     galleryName,
     refreshKey,
     isReopen: reopened,
+    agent,
+    setAgent,
     startForge: (id) => {
       setActiveKind('forge');
       setJobId(id);

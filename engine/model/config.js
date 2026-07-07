@@ -7,16 +7,17 @@ loadEnv();
 // a model id anywhere else. This table IS the "모델 스위처" the roadmap promotes to prod
 // once the A/B harness validates a challenger.
 export const MODELS = {
-  'gemini-pro':   { provider: 'gemini', model: process.env.KILN_GEMINI_PRO   || 'gemini-2.5-pro' },
-  'gemini-flash': { provider: 'gemini', model: process.env.KILN_GEMINI_FLASH || 'gemini-2.5-flash' },
-  'opus':         { provider: 'claude', model: process.env.KILN_OPUS         || 'claude-opus-4-8' },
-  'sonnet':       { provider: 'claude', model: process.env.KILN_SONNET       || 'claude-sonnet-5' },
-  'haiku':        { provider: 'claude', model: process.env.KILN_HAIKU        || 'claude-haiku-4-5-20251001' },
-  // Local agent — runs on the user's own Claude Code CLI (their auth/subscription, their
-  // chosen model). model '' = whatever their CLI defaults to; override via KILN_CC_MODEL
-  // (e.g. 'opus', 'sonnet'). Operator pays nothing. See src/providers/claude-code.js.
-  'claude-code':  { provider: 'claude-code', model: process.env.KILN_CC_MODEL || '' },
-  // Offline mock — lets the whole harness run end-to-end with no API key.
+  // Local BYO agents (default path) — run on the USER's own CLI: their auth/subscription, their
+  // chosen model. Operator pays nothing. model '' = whatever the CLI defaults to; override via
+  // env. See agents.js (detection) + providers/{claude-code,codex}.js.
+  'claude-code':  { provider: 'claude-code', model: process.env.KILN_CC_MODEL    || '' },
+  'codex':        { provider: 'codex',       model: process.env.KILN_CODEX_MODEL || '' },
+  // Hosted Claude API (optional hosted deployment — operator's Anthropic key). Not in the local
+  // agent picker; kept for A/B and a future hosted mode.
+  'opus':         { provider: 'claude', model: process.env.KILN_OPUS   || 'claude-opus-4-8' },
+  'sonnet':       { provider: 'claude', model: process.env.KILN_SONNET || 'claude-sonnet-5' },
+  'haiku':        { provider: 'claude', model: process.env.KILN_HAIKU  || 'claude-haiku-4-5-20251001' },
+  // Offline mock — lets the whole harness run end-to-end with no key/agent.
   'echo':         { provider: 'echo',   model: 'echo' },
 };
 

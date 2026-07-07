@@ -1,9 +1,9 @@
 #!/usr/bin/env node
-// Kiln A/B CLI — roadmap ① Gemini 품질 게이트.
+// Kiln A/B CLI — 모델/에이전트 품질 게이트.
 //
-//   node bin/ab.js                                   # offline dry-run (echo,echo) — no keys
-//   node bin/ab.js --variants gemini-pro,opus        # the real A/B
-//   node bin/ab.js --variants gemini-pro,opus --judge opus --baseline opus --epsilon 0.05
+//   node bin/ab.js                                      # offline dry-run (echo,echo) — no keys/agent
+//   node bin/ab.js --variants claude-code,codex         # compare local BYO agents
+//   node bin/ab.js --variants claude-code,opus --judge opus --baseline opus --epsilon 0.05
 //
 // Flags:
 //   --variants a,b     model aliases to compare      (default echo,echo)
