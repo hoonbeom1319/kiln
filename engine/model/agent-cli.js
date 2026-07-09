@@ -10,10 +10,18 @@ export function agentBin(envVar, winName, unixName) {
   return process.env[envVar] || (process.platform === 'win32' ? winName : unixName);
 }
 
+// Decide whether a command must go through a shell. On Windows only npm .cmd/.bat shims (e.g.
+// codex.cmd) need cmd.exe to resolve; a real .exe (claude.exe) must NOT — cmd.exe caps the command
+// line at ~8191 chars, so a large --append-system-prompt overflows and the CLI exits 1
+// ("명령줄이 너무 깁니다"). Spawning the .exe directly (shell:false) uses CreateProcess (~32KB limit).
+function needsShell(cmd) {
+  return process.platform === 'win32' && /\.(cmd|bat)$/i.test(cmd);
+}
+
 // Spawn an agent CLI, feed the prompt on stdin (avoids arg-length limits for large PRDs),
-// collect stdout. shell:true on Windows so npm .cmd shims (e.g. codex.cmd) resolve; a real .exe
-// (claude.exe) runs either way. Rejects on non-zero exit with stderr context.
-export function runAgent(cmd, args, input, { shell = process.platform === 'win32' } = {}) {
+// collect stdout. Shell only for .cmd/.bat shims (see needsShell); a real .exe runs shell-free so
+// large system-prompt args don't hit cmd.exe's line-length cap. Rejects on non-zero exit.
+export function runAgent(cmd, args, input, { shell = needsShell(cmd) } = {}) {
   return new Promise((resolve, reject) => {
     let child;
     try {
