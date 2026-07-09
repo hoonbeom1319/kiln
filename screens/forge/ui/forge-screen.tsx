@@ -53,7 +53,9 @@ export function ForgeScreen() {
             />
 
             <Panel as="aside" className="flex flex-col gap-4 p-4 lg:sticky lg:top-20">
-              <div className="flex items-center justify-between">
+              {/* Stack the title over the picker: the aside is ~360px, too narrow to sit the
+                  two-select picker beside the heading without both wrapping mid-word. */}
+              <div className="flex flex-col gap-2">
                 <h2 className="text-sm font-semibold">수정 · 버전</h2>
                 <AgentPicker value={m.agent} onChange={m.setAgent} disabled={reviseRunning} />
               </div>
