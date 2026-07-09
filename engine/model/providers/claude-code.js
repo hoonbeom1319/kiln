@@ -20,7 +20,16 @@ class ClaudeCodeProvider extends Provider {
     if (model) args.push('--model', model); // empty → the user's default CC model
     if (system) args.push('--append-system-prompt', system);
 
-    const stdout = await runAgent(claudeBin(), args, prompt);
+    let stdout;
+    try {
+      stdout = await runAgent(claudeBin(), args, prompt);
+    } catch (e) {
+      // claude -p often writes its result JSON (with is_error + a human message) to STDOUT even
+      // when it exits non-zero — e.g. a rate/usage limit mid-generation. Surface that real reason
+      // instead of a bare exit code, so a failed build says WHY. Fall back to stderr/exit code.
+      const detail = claudeErrorDetail(e.stdout) || e.stderr?.trim() || `종료코드 ${e.code ?? '?'}`;
+      throw new Error(`claude-code: 실패 — ${detail}`);
+    }
     let obj;
     try {
       obj = JSON.parse(stdout);
@@ -36,6 +45,19 @@ class ClaudeCodeProvider extends Provider {
       usage: { input: u.input_tokens || 0, output: u.output_tokens || 0 },
       raw: obj,
     };
+  }
+}
+
+// Pull a human-readable reason out of claude's JSON result (written to stdout even on error
+// exits). Returns null when stdout is empty/unparseable so the caller can fall back to stderr.
+function claudeErrorDetail(stdout) {
+  if (!stdout) return null;
+  try {
+    const o = JSON.parse(stdout);
+    const msg = typeof o.result === 'string' ? o.result : '';
+    return `${o.subtype || (o.is_error ? 'error' : 'unknown')}${msg ? ': ' + msg.slice(0, 200) : ''}`;
+  } catch {
+    return String(stdout).trim().slice(0, 200) || null;
   }
 }
 
