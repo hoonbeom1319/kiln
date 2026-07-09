@@ -1,0 +1,8 @@
+{
+  "name": "example-gemini-flash",
+  "idea": "Kiln A/B 예시 — _fixture 계약을 gemini-flash로 생성한 hi-fi 화면(런처 + 기능 화면). 로컬 우선 BYO-에이전트 파이프라인이 만들어내는 산출물의 형태를 보여주는 참고용 프로젝트다.",
+  "status": "done",
+  "createdAt": 1783395733000,
+  "updatedAt": 1783395733000,
+  "screenCount": 2
+}

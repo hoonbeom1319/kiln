@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>example-gemini-flash — 화면 갤러리</title>
+<style>
+  :root { color-scheme: light dark; }
+  body { font: 15px/1.5 system-ui, sans-serif; margin: 0; padding: 2rem; background: #0f1115; color: #e8eaed; }
+  h1 { font-size: 1.4rem; margin: 0 0 .25rem; }
+  p.idea { color: #9aa0a6; margin: 0 0 2rem; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 1.5rem; }
+  .card { margin: 0; border: 1px solid #2a2d34; border-radius: 12px; overflow: hidden; background: #16181d; }
+  figcaption { padding: .6rem .9rem; font-weight: 600; border-bottom: 1px solid #2a2d34; }
+  iframe { width: 100%; height: 520px; border: 0; background: #fff; display: block; }
+</style>
+</head>
+<body>
+  <h1>example-gemini-flash — 화면 갤러리</h1>
+  <p class="idea">Kiln A/B 예시 — _fixture 계약을 gemini-flash로 생성한 hi-fi 화면(런처 + 기능 화면). 로컬 우선 BYO-에이전트 파이프라인이 만들어내는 산출물의 형태를 보여주는 참고용 프로젝트다.</p>
+  <div class="grid">
+    <figure class="card">
+      <figcaption>index.html</figcaption>
+      <iframe src="screens/index.html" title="index.html" loading="lazy"></iframe>
+    </figure>
+
+    <figure class="card">
+      <figcaption>main.html</figcaption>
+      <iframe src="screens/main.html" title="main.html" loading="lazy"></iframe>
+    </figure>
+  </div>
+</body>
+</html>

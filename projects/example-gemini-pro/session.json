@@ -1,0 +1,8 @@
+{
+  "name": "example-gemini-pro",
+  "idea": "Kiln A/B 예시 — _fixture 계약을 gemini-pro로 생성한 hi-fi 화면(런처 + 기능 화면). 같은 계약을 다른 모델로 돌린 결과라 gemini-flash 예시와 나란히 비교할 수 있다.",
+  "status": "done",
+  "createdAt": 1783395734000,
+  "updatedAt": 1783395734000,
+  "screenCount": 2
+}

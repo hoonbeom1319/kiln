@@ -7,7 +7,9 @@ node_modules/
 # Generated output at the repo root only — anchored so it never swallows source dirs like
 # app/api/projects/ (an unanchored `projects/` matches that path too).
 /runs/
-/projects/
+/projects/*
+# ...except committed showcase projects (example-*), which the gallery renders as demos.
+!/projects/example-*/
 
 # Next.js
 .next/
