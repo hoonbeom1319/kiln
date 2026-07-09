@@ -21,12 +21,21 @@ export const MODELS = {
   'echo':         { provider: 'echo',   model: 'echo' },
 };
 
+// An alias may carry a model override after a colon — "claude-code:opus" means the claude-code
+// agent (local CLI, cost 0) run with `--model opus`. The base before the colon selects the
+// provider + default model from MODELS; the suffix (if any) overrides only the model id. No
+// colon → behaves exactly as before. This is how the two-level picker (agent → model) threads a
+// per-agent model choice through the single `model` seam without a second parameter.
 export function resolveModel(alias) {
-  const entry = MODELS[alias];
+  const raw = String(alias);
+  const colon = raw.indexOf(':');
+  const base = colon === -1 ? raw : raw.slice(0, colon);
+  const override = colon === -1 ? '' : raw.slice(colon + 1);
+  const entry = MODELS[base];
   if (!entry) {
-    throw new Error(`Unknown model alias "${alias}". Known: ${Object.keys(MODELS).join(', ')}`);
+    throw new Error(`Unknown model alias "${base}". Known: ${Object.keys(MODELS).join(', ')}`);
   }
-  return entry;
+  return { provider: entry.provider, model: override || entry.model };
 }
 
 export const DEFAULTS = {

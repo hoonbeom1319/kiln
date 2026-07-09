@@ -9,6 +9,7 @@ interface AgentRow {
   alias: string;
   label: string;
   available: boolean;
+  models?: { value: string; label: string }[];
   version?: string | null;
 }
 
@@ -22,6 +23,7 @@ export async function GET() {
         alias: a.alias,
         label: a.label,
         available: a.available,
+        models: a.models ?? [],
         version: a.version ?? null,
       })),
     });

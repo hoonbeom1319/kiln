@@ -4,19 +4,40 @@ import { useEffect } from 'react';
 import { useAgents } from '@/entities/agent';
 
 interface AgentPickerProps {
+  // Composite alias: the agent alias, optionally with a model suffix — "claude-code" or
+  // "claude-code:opus". Passed straight down to forge/revise as `model`.
   value: string | null;
   onChange: (alias: string) => void;
   disabled?: boolean;
 }
 
-// Feature (conventions.md §5): choose which local BYO agent runs the forge/revise. Reads the
-// detected agents, auto-selects the first available, and reports the chosen alias up. Execution
-// happens on the user's own CLI (their auth/subscription) — the operator pays nothing.
+// Split a composite alias into its agent + model parts. No suffix → model '' (the CLI default).
+function parse(value: string | null): { agent: string; model: string } {
+  if (!value) return { agent: '', model: '' };
+  const i = value.indexOf(':');
+  return i === -1
+    ? { agent: value, model: '' }
+    : { agent: value.slice(0, i), model: value.slice(i + 1) };
+}
+
+// Rebuild the composite alias. Empty model → just the agent alias (no colon).
+const compose = (agent: string, model: string) => (model ? `${agent}:${model}` : agent);
+
+const selectCls =
+  'rounded-md border border-border bg-surface-2 px-2 py-1 text-text focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent disabled:opacity-60';
+
+// Feature (conventions.md §5): choose which local BYO agent — and which of its models — runs the
+// forge/revise. Two dependent selects: the agent, then that agent's model menu (shown only when it
+// offers a real choice). Every option runs on the user's own CLI/subscription — operator cost 0.
 export function AgentPicker({ value, onChange, disabled }: AgentPickerProps) {
   const { data: agents = [], isLoading } = useAgents();
   const available = agents.filter((a) => a.available);
 
-  // Once detection resolves, default to the first available agent.
+  const { agent: agentAlias, model: modelValue } = parse(value);
+  const current = available.find((a) => a.alias === agentAlias) ?? null;
+  const models = current?.models ?? [];
+
+  // Once detection resolves, default to the first available agent (its own default model).
   useEffect(() => {
     if (!value && available.length) onChange(available[0].alias);
   }, [value, available, onChange]);
@@ -33,13 +54,15 @@ export function AgentPicker({ value, onChange, disabled }: AgentPickerProps) {
   }
 
   return (
-    <label className="flex items-center gap-2 text-xs text-muted">
-      실행 모델
+    <div className="flex items-center gap-2 text-xs text-muted">
+      <span>실행 모델</span>
       <select
-        value={value ?? ''}
-        onChange={(e) => onChange(e.target.value)}
+        aria-label="실행 에이전트"
+        value={agentAlias}
+        // Switching agent resets to that agent's default model (its menu differs).
+        onChange={(e) => onChange(compose(e.target.value, ''))}
         disabled={disabled}
-        className="rounded-md border border-border bg-surface-2 px-2 py-1 text-text focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent disabled:opacity-60"
+        className={selectCls}
       >
         {agents.map((a) => (
           <option key={a.alias} value={a.alias} disabled={!a.available}>
@@ -48,6 +71,22 @@ export function AgentPicker({ value, onChange, disabled }: AgentPickerProps) {
           </option>
         ))}
       </select>
-    </label>
+
+      {models.length > 1 ? (
+        <select
+          aria-label="모델"
+          value={modelValue}
+          onChange={(e) => onChange(compose(agentAlias, e.target.value))}
+          disabled={disabled}
+          className={selectCls}
+        >
+          {models.map((m) => (
+            <option key={m.value || 'default'} value={m.value}>
+              {m.label}
+            </option>
+          ))}
+        </select>
+      ) : null}
+    </div>
   );
 }

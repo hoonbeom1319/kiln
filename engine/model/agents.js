@@ -6,6 +6,11 @@ import { agentBin } from './agent-cli.js';
 // is the single source of truth for what the UI offers and what forge/revise can run.
 //
 // `alias` is the model alias passed to generate() (must exist in config.js MODELS).
+//
+// `models` is the per-agent model menu the two-level picker offers. Every option runs on the
+// user's OWN CLI/subscription (cost 0) — the picker sends `alias:value` (e.g. "claude-code:opus")
+// and the provider passes `--model value`. value '' = the CLI's own default model (no --model).
+// These can't be detected (they depend on the user's plan), so they're a curated list.
 export const AGENTS = [
   {
     alias: 'claude-code',
@@ -13,6 +18,12 @@ export const AGENTS = [
     win: 'claude.exe',
     unix: 'claude',
     env: 'KILN_CLAUDE_BIN',
+    models: [
+      { value: '', label: '구독 기본' },
+      { value: 'opus', label: 'Opus' },
+      { value: 'sonnet', label: 'Sonnet' },
+      { value: 'haiku', label: 'Haiku' },
+    ],
   },
   {
     alias: 'codex',
@@ -20,6 +31,9 @@ export const AGENTS = [
     win: 'codex.cmd',
     unix: 'codex',
     env: 'KILN_CODEX_BIN',
+    // Only the plan default for now — codex model slugs vary by account plan; add them here once
+    // confirmed for the target plan (they flow through as `codex exec -m <value>`).
+    models: [{ value: '', label: '기본' }],
   },
 ];
 
@@ -31,12 +45,13 @@ export async function detectAgents() {
     AGENTS.map(async (a) => {
       const bin = agentBin(a.env, a.win, a.unix);
       const resolved = await onPath(bin);
-      if (!resolved) return { alias: a.alias, label: a.label, available: false };
+      if (!resolved) return { alias: a.alias, label: a.label, available: false, models: a.models };
       const version = await probeVersion(bin).catch(() => null);
       return {
         alias: a.alias,
         label: a.label,
         available: version != null,
+        models: a.models,
         bin: resolved,
         version,
       };
