@@ -10,12 +10,15 @@
 // lands in your cwd, not inside the package.
 
 import { spawn } from 'node:child_process';
-import { existsSync } from 'node:fs';
+import { existsSync, mkdirSync, readdirSync, cpSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join, resolve } from 'node:path';
 
 const pkgDir = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const serverJs = join(pkgDir, '.next', 'standalone', 'server.js');
+// Showcase demos bundled in the package (build-dist.mjs seeds these). Copied into the user's
+// own projects/ on first run so a fresh install opens with a worked example to look at.
+const bundledProjects = join(pkgDir, '.next', 'standalone', 'projects');
 
 function parseArgs(argv) {
   const a = { port: process.env.PORT || process.env.KILN_PORT || '5000', open: true, help: false };
@@ -51,6 +54,27 @@ if (!existsSync(serverJs)) {
 const userCwd = process.cwd();
 const projectsRoot = join(userCwd, 'projects');
 const url = `http://localhost:${args.port}`;
+
+seedExamples(projectsRoot);
+
+// On a fresh workspace (no ./projects yet, or an empty one), copy the bundled example-*/ demos in
+// so the user opens straight into a worked example. Never touches a projects/ that already has
+// content — we don't clobber or duplicate onto real runs.
+function seedExamples(dest) {
+  if (!existsSync(bundledProjects)) return;
+  if (existsSync(dest) && readdirSync(dest).length > 0) return;
+  const demos = readdirSync(bundledProjects, { withFileTypes: true }).filter(
+    (e) => e.isDirectory() && e.name.startsWith('example-'),
+  );
+  if (!demos.length) return;
+  try {
+    mkdirSync(dest, { recursive: true });
+    for (const d of demos) cpSync(join(bundledProjects, d.name), join(dest, d.name), { recursive: true });
+    console.log(`     예시 ${demos.length}종 준비: ${demos.map((d) => d.name).join(', ')}`);
+  } catch {
+    /* best-effort seeding — a failure here shouldn't block the server from starting */
+  }
+}
 
 // Run the standalone server from the package dir (so it finds .next + scripts/), but point the
 // engine + gates + artifact routes at the user's own projects/ via env.

@@ -1,8 +1,10 @@
 // Assemble the standalone dist after `next build` (output: 'standalone').
 // Next traces a self-contained server into .next/standalone but does NOT copy the client assets
 // or public/ next to it — we do that here — and it pulls in the repo's projects/ (dev data) which
-// we drop. Run via `npm run dist` (prepack), so `npm publish`/`npm pack` always ship a correct tree.
-import { cpSync, rmSync, existsSync } from 'node:fs';
+// we drop, re-seeding only the committed example-*/ showcase projects (the launcher copies those
+// into the user's own projects/ on first run). Run via `npm run dist` (prepack), so
+// `npm publish`/`npm pack` always ship a correct tree.
+import { cpSync, rmSync, existsSync, readdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 
@@ -21,7 +23,19 @@ cpSync(join(root, '.next', 'static'), join(standalone, '.next', 'static'), { rec
 const pub = join(root, 'public');
 if (existsSync(pub)) cpSync(pub, join(standalone, 'public'), { recursive: true });
 
-// 3) drop dev data that file-tracing copied into the bundle (user data lives in their cwd at runtime).
-rmSync(join(standalone, 'projects'), { recursive: true, force: true });
+// 3) reset the bundle's projects/ to exactly the committed example-*/ showcase demos.
+//    File-tracing drags the whole repo projects/ (real dev runs) in — drop all of it, then copy
+//    back only example-*/. These are the seed source the launcher (bin/kiln.js) copies into the
+//    user's own projects/ on first run; user data itself lives in their cwd, never in the package.
+const bundleProjects = join(standalone, 'projects');
+rmSync(bundleProjects, { recursive: true, force: true });
 
-console.log('[build-dist] standalone 조립 완료 — static 복사 · projects 제거.');
+const repoProjects = join(root, 'projects');
+const examples = existsSync(repoProjects)
+  ? readdirSync(repoProjects, { withFileTypes: true }).filter((e) => e.isDirectory() && e.name.startsWith('example-'))
+  : [];
+for (const e of examples) {
+  cpSync(join(repoProjects, e.name), join(bundleProjects, e.name), { recursive: true });
+}
+
+console.log(`[build-dist] standalone 조립 완료 — static 복사 · projects → example-* ${examples.length}종(${examples.map((e) => e.name).join(', ') || '없음'}).`);

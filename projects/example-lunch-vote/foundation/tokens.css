@@ -1,0 +1,98 @@
+:root {
+  /* primitive */
+  --white: #ffffff;
+  --black: #000000;
+
+  --gray-50: #f7f6f4;
+  --gray-100: #eeece8;
+  --gray-200: #e0ddd6;
+  --gray-300: #cbc7bd;
+  --gray-400: #a8a297;
+  --gray-500: #837d71;
+  --gray-600: #635e54;
+  --gray-700: #47433b;
+  --gray-800: #2c2a25;
+  --gray-900: #1a1815;
+
+  --orange-50: #fff4ec;
+  --orange-100: #ffe3d1;
+  --orange-200: #ffc4a0;
+  --orange-300: #ff9f66;
+  --orange-400: #fb7f36;
+  --orange-500: #e8590c;
+  --orange-600: #c2410c;
+  --orange-700: #9a3412;
+
+  --green-100: #d7f2df;
+  --green-500: #2f9e44;
+  --green-600: #218839;
+  --green-700: #1a6e2e;
+
+  --red-100: #ffe0e0;
+  --red-500: #e03131;
+  --red-600: #c92a2a;
+
+  --amber-100: #fff2cc;
+  --amber-500: #f08c00;
+  --amber-700: #b45309;
+
+  --blue-500: #1c7ed6;
+
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 24px;
+  --sp-6: 32px;
+  --sp-7: 48px;
+
+  --radius-1: 8px;
+  --radius-2: 12px;
+  --radius-3: 20px;
+  --radius-full: 999px;
+
+  --font-1: 13px;
+  --font-2: 15px;
+  --font-3: 18px;
+  --font-4: 22px;
+  --font-5: 28px;
+
+  --touch-min: 48px;
+
+  /* semantic */
+  --color-bg: var(--gray-50);
+  --color-surface: var(--white);
+  --color-surface-alt: var(--gray-100);
+  --color-border: var(--gray-200);
+  --color-border-strong: var(--gray-300);
+
+  --color-text: var(--gray-900);
+  --color-text-muted: var(--gray-600);
+  --color-text-subtle: var(--gray-500);
+
+  --color-primary: var(--orange-500);
+  --color-primary-hover: var(--orange-600);
+  --color-primary-soft: var(--orange-100);
+  --color-on-primary: var(--white);
+
+  --color-vote-bar: var(--orange-400);
+  --color-vote-bar-track: var(--gray-200);
+
+  --color-success: var(--green-600);
+  --color-on-success: var(--white);
+  --color-success-soft: var(--green-100);
+
+  --color-danger: var(--red-600);
+  --color-on-danger: var(--white);
+  --color-danger-soft: var(--red-100);
+
+  --color-warning: var(--amber-700);
+  --color-warning-soft: var(--amber-100);
+
+  --color-info: var(--blue-500);
+
+  --color-focus-ring: var(--orange-400);
+  --color-overlay: rgba(26, 24, 21, 0.55);
+
+  --touch-target-min: var(--touch-min);
+}

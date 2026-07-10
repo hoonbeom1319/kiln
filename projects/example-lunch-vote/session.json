@@ -1,0 +1,259 @@
+{
+  "name": "example-lunch-vote",
+  "idea": "사내 점심 투표앱 만들어줘",
+  "status": "done",
+  "createdAt": 1783650036883,
+  "updatedAt": 1783650569855,
+  "screenCount": 4,
+  "events": [
+    {
+      "seq": 0,
+      "type": "step",
+      "t": 1783650036884,
+      "msg": "프로젝트: example-lunch-vote — \"사내 점심 투표앱 만들어줘\""
+    },
+    {
+      "seq": 1,
+      "type": "phase",
+      "t": 1783650036884,
+      "name": "PRD"
+    },
+    {
+      "seq": 2,
+      "type": "step",
+      "t": 1783650036884,
+      "msg": "PRD 초안 생성"
+    },
+    {
+      "seq": 3,
+      "type": "model",
+      "t": 1783650119746,
+      "stage": "prd",
+      "model": "claude-code",
+      "usage": {
+        "input": 3106,
+        "output": 4850
+      },
+      "attempts": 1
+    },
+    {
+      "seq": 4,
+      "type": "artifact",
+      "t": 1783650119748,
+      "path": "projects/example-lunch-vote/PRD.md",
+      "kind": "prd"
+    },
+    {
+      "seq": 5,
+      "type": "gate",
+      "t": 1783650119819,
+      "name": "lint-prd",
+      "ok": true,
+      "summary": "0 error · 0 warn — ✅ 통과 — 11개 섹션 완비."
+    },
+    {
+      "seq": 6,
+      "type": "phase",
+      "t": 1783650119822,
+      "name": "Design"
+    },
+    {
+      "seq": 7,
+      "type": "step",
+      "t": 1783650119824,
+      "msg": "디자인 토큰 생성"
+    },
+    {
+      "seq": 8,
+      "type": "model",
+      "t": 1783650142779,
+      "stage": "tokens",
+      "model": "claude-code",
+      "usage": {
+        "input": 3105,
+        "output": 1509
+      },
+      "attempts": 1
+    },
+    {
+      "seq": 9,
+      "type": "artifact",
+      "t": 1783650142785,
+      "path": "projects/example-lunch-vote/foundation/tokens.css"
+    },
+    {
+      "seq": 10,
+      "type": "step",
+      "t": 1783650142785,
+      "msg": "흐름 계약(00-flow.md) 생성"
+    },
+    {
+      "seq": 11,
+      "type": "model",
+      "t": 1783650157112,
+      "stage": "flow",
+      "model": "claude-code",
+      "usage": {
+        "input": 3105,
+        "output": 740
+      },
+      "attempts": 1
+    },
+    {
+      "seq": 12,
+      "type": "artifact",
+      "t": 1783650157115,
+      "path": "projects/example-lunch-vote/00-flow.md"
+    },
+    {
+      "seq": 13,
+      "type": "step",
+      "t": 1783650157115,
+      "msg": "하이파이 화면 빌드"
+    },
+    {
+      "seq": 14,
+      "type": "model",
+      "t": 1783650455279,
+      "stage": "hi-fi",
+      "model": "claude-code",
+      "usage": {
+        "input": 3106,
+        "output": 31074
+      },
+      "attempts": 1
+    },
+    {
+      "seq": 15,
+      "type": "artifact",
+      "t": 1783650455282,
+      "path": "projects/example-lunch-vote/screens/index.html",
+      "kind": "screen"
+    },
+    {
+      "seq": 16,
+      "type": "artifact",
+      "t": 1783650455285,
+      "path": "projects/example-lunch-vote/screens/home.html",
+      "kind": "screen"
+    },
+    {
+      "seq": 17,
+      "type": "artifact",
+      "t": 1783650455287,
+      "path": "projects/example-lunch-vote/screens/create.html",
+      "kind": "screen"
+    },
+    {
+      "seq": 18,
+      "type": "artifact",
+      "t": 1783650455289,
+      "path": "projects/example-lunch-vote/screens/vote.html",
+      "kind": "screen"
+    },
+    {
+      "seq": 19,
+      "type": "step",
+      "t": 1783650455289,
+      "msg": "독립 검증(design-verifier) — 화면 4개"
+    },
+    {
+      "seq": 20,
+      "type": "model",
+      "t": 1783650561074,
+      "stage": "verify",
+      "model": "claude-code",
+      "usage": {
+        "input": 3106,
+        "output": 6642
+      },
+      "attempts": 1
+    },
+    {
+      "seq": 21,
+      "type": "gate",
+      "t": 1783650561076,
+      "name": "design-verifier",
+      "ok": false,
+      "summary": "FAIL — ng home.html:deadControl"
+    },
+    {
+      "seq": 22,
+      "type": "warn",
+      "t": 1783650561076,
+      "msg": "design-verifier FAIL — 재작업 지시는 design-verify.md 참고(데모 계속)"
+    },
+    {
+      "seq": 23,
+      "type": "step",
+      "t": 1783650561077,
+      "msg": "PRD↔화면 traceability 매핑"
+    },
+    {
+      "seq": 24,
+      "type": "model",
+      "t": 1783650569652,
+      "stage": "trace",
+      "model": "claude-code",
+      "usage": {
+        "input": 3106,
+        "output": 387
+      },
+      "attempts": 1
+    },
+    {
+      "seq": 25,
+      "type": "artifact",
+      "t": 1783650569655,
+      "path": "projects/example-lunch-vote/traceability.json",
+      "kind": "traceability"
+    },
+    {
+      "seq": 26,
+      "type": "phase",
+      "t": 1783650569658,
+      "name": "Handoff"
+    },
+    {
+      "seq": 27,
+      "type": "step",
+      "t": 1783650569660,
+      "msg": "handoff 문서 4종 생성(token-mapping · hand-off · inventory · index)"
+    },
+    {
+      "seq": 28,
+      "type": "artifact",
+      "t": 1783650569667,
+      "path": "projects/example-lunch-vote/handoff/"
+    },
+    {
+      "seq": 29,
+      "type": "step",
+      "t": 1783650569667,
+      "msg": "pack-handoff — self-contained 패키징"
+    },
+    {
+      "seq": 30,
+      "type": "gate",
+      "t": 1783650569766,
+      "name": "pack-handoff",
+      "ok": true,
+      "summary": "0 error · 0 warn — ✅ screens/"
+    },
+    {
+      "seq": 31,
+      "type": "gate",
+      "t": 1783650569848,
+      "name": "lint-handoff",
+      "ok": true,
+      "summary": "0 error · 0 warn — ✅ 통과."
+    },
+    {
+      "seq": 32,
+      "type": "done",
+      "t": 1783650569850,
+      "name": "example-lunch-vote",
+      "dir": "projects/example-lunch-vote"
+    }
+  ]
+}

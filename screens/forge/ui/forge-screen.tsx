@@ -98,7 +98,7 @@ export function ForgeScreen() {
                 </h2>
                 <p className="text-pretty text-sm text-muted">
                   PRD · 디자인(tokens + hi-fi 화면) · handoff 패키지까지. 실행은 당신 로컬 에이전트로,
-                  운영자 비용 0.
+                  당신 구독·모델로 돌아갑니다.
                 </p>
               </div>
               <Panel className="p-5 text-left">

@@ -48,7 +48,7 @@ export function AgentPicker({ value, onChange, disabled }: AgentPickerProps) {
     return (
       <p className="text-xs text-warn">
         실행할 모델이 없습니다 — <code className="font-mono">claude</code> 또는{' '}
-        <code className="font-mono">codex</code> CLI를 설치하세요. 실행은 당신의 구독으로, 운영자 비용 0.
+        <code className="font-mono">codex</code> CLI를 설치하세요. 실행은 당신의 구독·모델로 돌아갑니다.
       </p>
     );
   }
