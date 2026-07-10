@@ -1,6 +1,6 @@
 {
   "name": "@hb-kit/kiln",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "type": "module",
   "description": "아이디어 한 줄을 브라우저에서 구워 개발 인계 패키지로 — PRD · 디자인(tokens + hi-fi) · handoff. 그 폴더를 당신이 이미 쓰는 코딩 에이전트(claude / codex)에 넘기면 개발이 시작된다.",
   "bin": {

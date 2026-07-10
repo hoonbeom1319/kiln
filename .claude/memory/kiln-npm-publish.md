@@ -30,4 +30,10 @@ metadata:
 
 **2026-07-10 추가 — UI 잔존 "운영자 비용 0" 제거 + README "1회 질문" 오류 수정:** 공개 카피 재작성 때 README는 정리됐으나 **UI 코드에 2곳 잔존**을 사용자가 앱에서 발견 → `features/agent-picker/agent-picker.tsx`(모델 없음 경고)·`screens/forge/ui/forge-screen.tsx`(히어로) 문구를 "…당신 구독·모델로 돌아갑니다"로 교체. agent-picker.tsx:31 코드주석 "operator cost 0"은 내부 근거라 유지(공개 문자열만 변경). 또 README가 "아이디어 한 줄 + **시작 1회 질문**"이라 했는데 **실제 파이프라인엔 질문 스텝 없음**(`engine/pipeline/forge.js` = prd→design→handoff 직행, forge-form은 아이디어 textarea + 'Forge 시작'뿐) → README 4곳(핵심카드·하는일 문단·ASCII 다이어그램·캡션)에서 "1회 질문" 제거해 "아이디어 한 줄이면 된다"로 실제와 일치시킴. (원래 atelier는 질문했었음; 지금 kiln은 바로 시작이 의도.) ※ 사용자 방향: kiln은 웹/SaaS 아님 — 지금은 터미널(`npx`), 나중에 exe/데스크톱 빌드 고려.
 
+**2026-07-10 — 첫 배포(`0.0.1`) 완료 + 회귀 2건 발견/수정 → `0.0.2` 재배포 예정:**
+- **배포 방식**: 사용자가 **수동 `npm publish`**로 함(에이전트가 publish 안 함). npm 로그인=`hoonbeom`, `@hb-kit` 스코프 read-write. 첫 버전은 사용자 선호로 `0.0.1`(0.1.0 아님).
+- **README "no README" 소동**: npmjs.com이 "This package does not have a README" 표시. 조사 결과 **패키지는 정상** — tarball에 README.md(192줄) 포함, 레지스트리 top-level `.readme` 6486자 채워짐. 버전-레벨 `.readme`는 0인데 **형제 atelier도 동일(버전 readme=0)한데 웹은 잘 뜸** → 원인은 **npmjs.com 렌더링 지연**(갓 배포분). 대응: 기다리거나 패치 재배포로 트리거. (즉 버전-레벨 빈 readme는 정상, 원인 아님.)
+- **macOS 5000포트 403(중요)**: 사용자가 맥에서 `npx @hb-kit/kiln` → 403 blank. 원인 = **macOS Monterey+ AirPlay Receiver가 포트 5000 점유하고 non-AirPlay 요청에 403**(Flask 5000 이슈와 동일). kiln 기본 포트가 5000이라 전 맥 사용자가 첫 실행에 막힘. **수정: `bin/kiln.js` 기본 포트 5000→4173 + 사용 중이면 다음 빈 포트로 롤포워드**(`node:net`으로 `portFree` 프로브 → `pickPort(start,20)` 스캔, 옮기면 "⚠ 포트 X 사용 중 — Y로 넘어갑니다" 로그). README launcher 문구도 4173로. (repo `npm run dev`는 5000 유지 — 윈도우 개발이라 무관.) 실측: 배포 tarball 추출·부팅 OK(Ready ~305ms, 예시 시딩 로그 "예시 1종 준비: example-lunch-vote"), 2인스턴스로 4173→4174 롤포워드 확인.
+- **다음 세션**: `0.0.2` 수동 `npm publish`(port fix + README 렌더 트리거). prepack이 next build로 dev서버 .next 덮으니 배포 후 dev 재시작.
+
 관련: 웹셸 배경 [[kiln-web-shell]], 반응형 [[kiln-web-responsive]], 모델 축 [[kiln-model-strategy]]. 모체 아틀리에 = `@hb-kit/atelier`(../atelier, CLI 템플릿).

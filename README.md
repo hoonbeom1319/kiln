@@ -20,7 +20,7 @@
 ## 🚀 설치 · 실행
 
 ```bash
-npx @hb-kit/kiln           # 브라우저 워크숍이 열린다 (기본 http://localhost:5000)
+npx @hb-kit/kiln           # 브라우저 워크숍이 열린다 (기본 http://localhost:4173, 사용 중이면 다음 빈 포트로)
 ```
 
 또는 전역 설치:
