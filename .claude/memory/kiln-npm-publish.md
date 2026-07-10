@@ -45,6 +45,8 @@ metadata:
 - **(핵심) 갤러리가 파생본 아닌 라이브 원본을 읽게** `widgets/result-gallery/result-gallery.tsx`: `screenUrl`을 `${name}/handoff/screens/${file}` → **`${name}/screens/${file}`**. 화면 HTML은 토큰 인라인 self-contained(테스터가 file://로 증명)라 그대로 렌더 → pack 성패와 무관. 썸네일·디테일·"크게 열기" 전부 이걸로 고쳐짐.
 - **(근본) 게이트에 서버의 PROJECTS_ROOT 주입** `engine/pipeline/gates.js`: 게이트 `scripts/*.cjs`가 프로젝트 폴더를 서버와 **별도로 재계산**(env 또는 repo-relative)해서, 서버 cwd/repo-root와 다르면 프로젝트를 못 찾아 exit 1(=✗)→handoff 미패킹. `runGate`가 `spawn`에 `env:{...process.env, KILN_PROJECTS_ROOT: PROJECTS_ROOT}`(project.js에서 import)로 **서버가 쓰는 그 루트를 강제 일치**. pack 실패의 유력 원인 직격(불일치 없어도 무해). 이게 고쳐지면 서빙 "handoff ↗"(handoff/index.html)도 정상화.
 - **(방어) handoff .zip이 반쪽 안 되게** `server/controllers/handoff-controller.ts` `packHandoffZip`: handoff/에 `screens`/`foundation`/`PRD.md`/`00-flow.md`가 없으면 프로젝트 루트에서 **백필**. pack이 실패해도 다운로드가 문서만 있는 껍데기가 안 됨.
-- **참고**: `design-verifier` FAIL·`screens-nonblank` 게이트 칩은 **라이브 잡 이벤트**로만 뜸 → `?project=`로 재오픈한 갤러리(stream.events 빔)엔 안 보임. 오늘 흰 화면은 빈 화면(위 blank-gate)이 아니라 이 **pack/경로 문제**였음 — 둘은 별개 버그. `npx tsc --noEmit` 통과, `node --check gates.js` OK. **미커밋·미배포.**
+- **참고**: `design-verifier` FAIL·`screens-nonblank` 게이트 칩은 **라이브 잡 이벤트**로만 뜸 → `?project=`로 재오픈한 갤러리(stream.events 빔)엔 안 보임. 오늘 흰 화면은 빈 화면(위 blank-gate)이 아니라 이 **pack/경로 문제**였음 — 둘은 별개 버그. `npx tsc --noEmit` 통과, `node --check gates.js` OK.
+
+- **`0.0.3` 배포 완료(2026-07-10)**: 위 맥 버그 3건 수정(흰 화면 방지·수정채팅 복구·handoff .zip) 전부 커밋(`b6f6f43`)·`package.json` 0.0.3 범프(`ffeccc0`) push 후 사용자 수동 `npm publish` 성공. `npm view @hb-kit/kiln` → `version=0.0.3`, `dist-tags.latest=0.0.3`, 배포 05:48 UTC. 배포 tarball 검증(2131파일): `.next/standalone`에 신규 handoff 라우트(`app/api/handoff/[name]/route.js` + static chunk) 번들·example-lunch-vote handoff 폴더 포함 확인.
 
 관련: 웹셸 배경 [[kiln-web-shell]], 반응형 [[kiln-web-responsive]], 모델 축 [[kiln-model-strategy]]. 모체 아틀리에 = `@hb-kit/atelier`(../atelier, CLI 템플릿).
