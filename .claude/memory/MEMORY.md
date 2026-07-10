@@ -6,5 +6,5 @@
 - [MVP 파이프라인](kiln-mvp-pipeline.md) — Gemini 헤드리스 forge 엔진(pipeline/) 구조·결정
 - [웹 껍데기](kiln-web-shell.md) — SSE 스트리밍 웹(Next.js+FSD, repo 루트 직속), emit seam 구독, 브라우저 검증됨
 - [풀 반응형 (완료)](kiln-web-responsive.md) — 2026-07-10 셸 mobile-first + full-width(no max-w) + 단일 body 스크롤: keep-all·탑바 wrap·gallery md 분기·런치패드 lg 분할·ScaledFrame virtualHeight(100vh 아티팩트)
-- [C2 agentic 방향 (다음 개발 기준)](kiln-c2-agentic.md) — 2026-07-10 확정: 엔진 척추 유지 + 실행만 agentic CC 툴루프(터미널 atelier의 웹 재탄생). **착수 ①(shoot 게이트)·②(runAgentic 렌더-인-루프)·③(design-verify 적대적 픽셀 vision + revise 확산) 완료**, 다음=④ codex→gemini 단발 폴백 provider. Claude 1급·모델 점진 확장
+- [C2 agentic 방향 (다음 개발 기준)](kiln-c2-agentic.md) — 2026-07-10 확정: 엔진 척추 유지 + 실행만 agentic CC 툴루프(터미널 atelier의 웹 재탄생). **①(shoot)·②(runAgentic 렌더-인-루프)·③(design-verify 픽셀 vision + revise 확산) 완료, ④ codex 배선검증(계정한계로 green 이월)·gemini 이월**. 하류 provider-무관이라 codex 단발폴백은 코드변경 0. Claude 1급·모델 점진 확장
 - [npm 배포 (준비완료)](kiln-npm-publish.md) — @hb-kit/kiln 웹 런처, self-contained standalone, KILN_PROJECTS_ROOT로 데이터/코드 분리, bin/kiln.js. 새 세션에서 npm publish + 체크리스트
