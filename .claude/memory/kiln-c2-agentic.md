@@ -34,7 +34,9 @@ metadata:
 
 **부트스트랩 방식 확정(②에서 구현):** 번들링 아님(~150MB×플랫폼별 → tarball ~1GB, standalone이 spawn된 shoot.cjs 트레이스 불가), 시스템 Edge 재사용도 아님(버전 제각각 → 픽셀 불일치). **"첫 렌더 자동 다운로드"** 채택 — 픽셀 게이트라 **모두 동일 크로미움=렌더 일관성**이 이김. 규격: 런처(bin/kiln.js)가 **첫 렌더 필요 시점에**(런처 시작 아님) `playwright install chromium` 자동 + 진행 표시 + 실패 시 graceful skip 강등 + 1회 후 캐시 재사용. 사용자는 명령어 직접 안 침(`npx @hb-kit/kiln`만으로). standalone 트레이스에 playwright 라이브러리 포함도 ② 과제.
 
-**다음 세션(④ 잔여):** (a) Codex 접근 가능한 계정/머신에서 codex green 실측(현재는 배선만 검증) · (b) gemini-cli BYO provider 추가(`engine/model/providers/gemini.js` codex.js 미러 + AGENTS row + config `gemini` alias, `supportsAgentic=false` → 자동 단발 폴백)·실측. agentic 시임(`runAgentic`/`buildScreensAgentic`/`judgeHiFiAgentic`/`verifyScreens`) 완비. 여력되면 전체 revise 런 통합 실측(③ 미실측 표면).
+**③ revise 확산 전체 통합 실측 완료(2026-07-10):** `example-lunch-vote` 복사본에 실제 개정("vote에 마감 카운트다운 추가", `bin/revise.js --model claude-code`)을 end-to-end로 돌려 **plan→rebuild→shoot→픽셀검증→traceability→handoff→v2 커밋** 전 단계 통과 확인. plan이 국소(vote.html)로 정확히 스코핑·토큰/흐름 보존, rebuild가 카운트다운 실제 삽입(setInterval·19×countdown), shoot ✅, **개정 픽셀검증(neu ③ 코드)이 vote.png를 Read해 사전존재 왕관 렌더결함을 bad로 FAIL 판정**(다른 항목 전부 ok로 정밀 판정) — advisory라 개정 계속. ③은 이제 미실측 표면 없음. **부수 발견: 패키징 showcase `example-lunch-vote`의 vote.html에 왕관(👑) 렌더 버그**(`.crown{display:none}` base 규칙 없음 → 진행중 상태에서 non-winner에 왕관 노출, 1위엔 없음) — npx 사용자가 보는 예제라 별도 수정 대상.
+
+**다음 세션(④ 잔여):** (a) Codex 접근 가능한 계정/머신에서 codex green 실측(현재는 배선만 검증) · (b) gemini-cli BYO provider 추가(`engine/model/providers/gemini.js` codex.js 미러 + AGENTS row + config `gemini` alias, `supportsAgentic=false` → 자동 단발 폴백)·실측. agentic 시임(`runAgentic`/`buildScreensAgentic`/`judgeHiFiAgentic`/`verifyScreens`) 완비.
 
 **리스크(선반영):** Playwright/chromium 패키징 — **해소 방향 확정: "첫 렌더 자동 다운로드"**(번들·시스템Edge 아님, 위 착수①상세 참조. ②에서 런처 구현) · 멀티턴 툴루프 비용·속도(메모리상 CC가 콜마다 무거운 컨텍스트 로드 → 몇 배, turn/budget 캡 필수) · stream-json→SSE 매핑은 실 통합 작업 · **게이트는 엔진 강제 유지**(에이전트 자율에 안 맡김).
 
