@@ -17,7 +17,7 @@
     "access": "public"
   },
   "scripts": {
-    "dev": "next dev -p 5000",
+    "dev": "next dev -p 4173",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",

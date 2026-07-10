@@ -166,7 +166,7 @@ Kiln 자체를 손보고 싶다면 이 repo를 clone해 Next.js dev로 띄운다
 ```bash
 git clone <this-repo> kiln && cd kiln
 npm install
-npm run dev            # http://localhost:5000 — 브라우저에서 아이디어 한 줄부터
+npm run dev            # http://localhost:4173 — 브라우저에서 아이디어 한 줄부터
 ```
 
 **CLI로도 같은 엔진을 몰 수 있다** (웹 없이):
