@@ -1,8 +1,10 @@
 import { mkdir, writeFile, readFile } from 'node:fs/promises';
+import { existsSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { generate } from '../../model/generate.js';
 import { buildScreens } from '../build-screens.js';
 import { judgeHiFi } from '../../harness/judge.js';
+import { runGate, gateSummary } from '../gates.js';
 import { noteStatus } from '../project.js';
 import { tokensSystem, tokensPrompt, flowSystem, flowPrompt } from '../prompts/design.js';
 import { mapTraceability } from '../traceability.js';
@@ -61,6 +63,27 @@ export async function designStage(ctx, { emit, model = 'claude-code', judge = 'c
   }
   if (blanks.length) {
     emit('warn', { msg: `빈 화면 감지: ${blanks.map(fileBase).join(', ')} — 재생성을 권장합니다` });
+  }
+
+  // Render gate (shoot) — the pixel-level check the source-reading guards above can't do: render
+  // each screen headless and catch renders that are blank/near-white even when the HTML source
+  // looks fine, and drop the PNGs to _shots/ (input for a later vision pass). Advisory like the
+  // design-verifier below: reports + shows a chip, never blocks. Skips gracefully (exit 0) when
+  // chromium isn't installed — so npx users who haven't run `playwright install` just see a skip.
+  emit('step', { msg: `렌더 게이트(shoot) — 화면 ${build.files.length}개` });
+  const shot = await runGate('shoot.cjs', ctx.name);
+  emit('gate', { name: 'render-shoot', ok: shot.ok, summary: gateSummary(shot.output) });
+  if (!shot.ok) {
+    emit('warn', {
+      msg: '렌더 게이트 blank 감지 — 아래 리포트 확인(데모 계속)\n' +
+        shot.output.split('\n').filter((l) => l.includes('❌')).join('\n'),
+    });
+  }
+  for (const f of build.files) {
+    const shotRel = `_shots/${f.path.replace(/\.html$/i, '.png')}`;
+    if (existsSync(join(ctx.dir, shotRel))) {
+      emit('artifact', { path: `projects/${ctx.name}/${shotRel}`, kind: 'shot' });
+    }
   }
 
   emit('step', { msg: `독립 검증(design-verifier) — 화면 ${build.files.length}개` });

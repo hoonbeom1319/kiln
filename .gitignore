@@ -19,5 +19,8 @@ tsconfig.tsbuildinfo
 # Playwright MCP output
 .playwright-mcp/
 
+# Render gate (shoot) output — regenerated per run, not source
+projects/*/_shots/
+
 # npm pack artifact
 *.tgz

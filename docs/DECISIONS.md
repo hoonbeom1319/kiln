@@ -107,6 +107,30 @@ atelier 자산은 두 층으로 나뉜다:
   - **웹**: BFF `GET /api/agents`(감지 목록) → `entities/agent`(useAgents) → `features/agent-picker`(감지된 것만, 첫 available 자동선택, 미설치 grey) → `screens/forge` 2모드 헤더에 셀렉터, 선택 alias를 forge/revise에 `model`로 전달(judge/planner도 같은 에이전트).
   - **검증(이 머신, 실측)**: claude(2.1.202)·codex(0.112.0) **둘 다 감지**. `generate(claude-code)` 단발 정상("김치, 된장, 고추장"). **웹 forge(claude-code) end-to-end**: UI 셀렉터→`POST /api/forge {model:claude-code}`→엔진이 로컬 claude 구동→스트림 "prd via claude-code (5203 out tok)"→205줄 PRD "책갈피" 작성→lint-prd 게이트→개정 패스. tsc 0·ab:dry PASS·`/api/agents` 200. **codex는 code-complete지만 이 계정이 ChatGPT 플랜에서 어떤 codex 모델도 미지원**("not supported when using Codex with a ChatGPT account") → provider가 그 메시지를 깔끔히 표면화(크래시 아님). 사용자 플랜 해결 시 동작.
   - **다음(배포 포장 — 코어 위에 순차)**: `npx kiln`(글로벌 CLI, 최저 마찰·높은 도달) → 데스크톱 앱(Electron) → 로컬 데몬 + klin.com 웹UI(VS Code Remote Tunnel 패턴). git clone은 이미 됨(개발자 최저 단계). 관련 [[kiln-model-strategy]]·[[kiln-web-shell]].
+- **2026-07-10 — 아키텍처 방향 확정: C2("엔진 척추 + 실행만 agentic"). 컨셉 = 터미널 atelier를 웹에서 재탄생.** 배포(0.0.3) 후 엔진 고도화 탐색에서, 현재 `claude-code` provider가 `--max-turns 1` **단발 생성기**라 atelier의 핵심 품질 레버(**렌더-인-루프 자가수정**)를 잃은 상태임을 확인 → 방향 재설계.
+  - **탐색에서 드러난 사실**:
+    - **shoot(Playwright 렌더 게이트)가 미이식.** DECISIONS엔 "포터블 재사용"으로 적었으나 실제 `scripts/`엔 `lint-prd`·`pack-handoff`·`lint-handoff` 3개뿐. **design-verifier는 모델이 HTML *텍스트*를 읽는 판정 — 픽셀을 안 본다.** atelier hi-fi 우위(비주얼 충실도)의 핵심을 잃음.
+    - **harness/ 잔재.** `ab.js`·`build.js`·`score.js`·`fixture.js`는 로드맵①(Gemini GO/NO-GO)용이었으나 로컬 피벗으로 **목적 소멸**. `bin/ab.js`(ab:dry echo 스모크)로만 도달. `build.js`는 폐기된 HTML-in-JSON 포맷 중복, `fixture.js`는 `../atelier` 커플링. (judge.js·schemas·prompts는 파이프라인이 공유 — 살아있음)
+    - **LangGraph(로드맵②) 사실상 무효.** 팔던 것(provider추상화·관찰가능성·영속성) 대부분 직접 구현 완료. 멀티모델·다수결(주 용도)은 로컬 피벗이 폐기. 유일 갭=재개(~50줄) — 프레임워크 도입 사유 아님.
+  - **결정 — (C2) 확정**: Claude 전용을 1급으로 갈아끼우되, **Node 엔진이 순서·게이트(척추)를 계속 소유**하고 각 스테이지 실행만 `--max-turns 1` → **툴(Playwright) 멀티턴 CC 에이전트**로 위임(자가수정). = atelier의 *능력*을 kiln의 *척추* 위에서.
+    - **C1 기각**(엔진 삭제, 오케스트레이션을 CC skill/workflow로 = atelier 문자 그대로 이식): codex/gemini엔 그 프리미티브가 없어 **"모델 하나씩 추가"를 죽이고** provider seam(크라운주얼)을 버림. C2는 SSE seam 유지·게이트 단단·확장 점진.
+    - **모델 확장은 claude 완성 → codex → gemini** 순서로, 같은 스테이지 계약 뒤 **단발 폴백 provider**로 하나씩.
+  - **청사진(C2)**:
+    1. seam에 `supportsAgentic` 플래그(+`claude-code.js`의 `supportsStructured` 옆).
+    2. `generate()`의 형제 `runAgentic(task,{tools,maxTurns})`. claude-code=`claude -p --output-format stream-json`(멀티턴+Playwright). codex/echo 미구현 → **단발 `generate` + 외부 게이트로 폴백**.
+    3. **shoot 부활 = 최대 레버.** 두 소비자: agentic 빌드가 루프 중 부르는 **툴** + 폴백 경로의 **외부 게이트**. 스크립트 1, 용처 2.
+    4. 스테이지 = "agentic 우선, 단발 폴백". 큰 승부 = **hi-fi 빌드 + design-verify를 렌더-인-루프**로.
+    5. **웹 SSE seam 불변** — 엔진이 phase/step/gate/artifact emit, agentic 콜은 turn/tool-call 서브이벤트를 얹어 스트리밍.
+  - **착수 순서**: ① shoot를 외부 게이트로 부활(아키 변경 0, 픽셀검증 즉시 복귀 — 가장 작은 순수 이득) → ② `runAgentic`+claude-code stream-json + hi-fi 빌드 agentic화(shoot=툴) → ③ design-verify(적대적 서브에이전트)·revise로 확산 → ④ codex/gemini 단발 폴백 provider.
+  - **리스크(선반영)**: Playwright/chromium 패키징(`npx kiln` 사용자 `playwright install` 부트스트랩 — 채택 마찰) · 멀티턴 툴루프 비용·속도(turn/budget 캡 필수) · stream-json→SSE 매핑 · **게이트는 엔진 강제 유지**(에이전트 자율에 안 맡김).
+  - **후속 정리**: best-of-N(#3)·auto-rework(#1)은 **agentic 자가수정이 흡수** → harness 잔재는 "승격"이 아니라 **retire/정리** 대상. 상세 [[kiln-c2-agentic]].
+- **2026-07-10 (착수 ① 완료) — shoot 렌더 게이트 부활. 아키 변경 0, 픽셀검증 즉시 복귀.** C2 착수순서 ①을 그대로 이행: atelier `shoot.js`를 kiln 게이트 계약에 맞춰 포터블 이식하고 design 스테이지에 외부 게이트로 연결. **끝까지 실제로 돌려 검증**.
+  - **이식(`scripts/shoot.cjs`)**: 원본은 `<project> <relDir> [WxH]`·PNG 경로 stdout 나열이었으나, **kiln 게이트 계약(runGate는 단일 인자 `<project>`만 전달, gateSummary가 ✅/⚠️/❌ 파싱)**에 맞춰 재작성. 단일 인자 + `KILN_PROJECTS_ROOT` 존중(lint-prd 스타일) + 대상 `screens/*.html` **자동 고정**(빌더가 화면을 항상 `screens/`에 씀, build-screens.js `<<<FILE screens/…>>>`) → `_shots/screens/*.png`.
+  - **"픽셀검증"의 실체 — 결정론적 렌더 체크(모델 비용 0)**: 기존 `isBlankScreen`(design.js, HTML **소스** 판정)을 **렌더된 결과** 판정으로 승격. `page.evaluate`로 렌더된 DOM 지표(bodyH·가시요소수·innerText 길이) + PNG 헤더 폭×높이·픽셀당 바이트. 두 층: **❌ blank(하드, exit 1)** = `bodyH<200 || 가시요소<8 || 글자<30`(소스판정의 픽셀 버전) · **⚠️ near-uniform(권고)** = 픽셀당 바이트<12KB/MP(균일 압축 = 흰 화면·와이어풍 의심 휴리스틱, 강제 아님). 찍힌 PNG는 `_shots/`에 남아 **착수 ③ vision 판정의 입력** — 오늘 산출물이 다음 단계 자산.
+  - **연결(`design.js`)**: 빈 화면 가드 직후·design-verifier 앞에 `runGate('shoot.cjs')` → `emit('gate', {name:'render-shoot'})` + 존재하는 PNG만 `kind:'shot'` 아티팩트로. **advisory(비차단)** — handoff/verifier와 동일(FAIL이면 warn+칩, 데모 계속·throw 없음).
+  - **패키징 마찰 해소(리스크 선반영 항목)**: 발견 — **kiln엔 playwright npm 의존성이 애초에 없었다**(`.mcp.json`의 `@playwright/mcp`는 착수 ②의 agentic 툴용, 별개). 이식은 "아키 0"이나 "의존성 0"은 아님. → dev엔 `playwright` devDep + `npx playwright install chromium`. **npx 사용자엔 graceful skip**: `shoot.cjs`가 `require('playwright'||'@playwright/test')` 실패·chromium 런치 실패를 **모두 스킵으로 강등**(설치 힌트 + exit 0) → 미설치 사용자 데모 안 깨짐. 렌더 게이트 = "있으면 켜지고 없으면 조용히 빠지는" 옵트인 레이어. **자동 부트스트랩(런처 첫 실행 `playwright install`)은 착수 ②(stream-json 통합)로 이월** — 오늘은 "가장 작은 순수 이득" 범위 유지.
+  - **검증(실측)**: playwright+chromium 설치 후 두 프로젝트 8화면 전부 `✅ 통과`(실 픽셀 지표, 예 `main.html — 2560×3540 · 요소 195 · 글자 543`). **blank 발화 증명**(no-op 아님): 빈 `<body>` 렌더 → `❌ 렌더 blank (h=0px, 요소=0, 글자=0)` + exit 1, 옆 정상 화면 `✅`. **graceful skip**: 설치 전 → `⚠️ 크로미움 미설치` + exit 0. `node --check` design.js·shoot.cjs 통과, `gateSummary`가 다른 게이트와 동일 한 줄로 압축. `.gitignore`에 `projects/*/_shots/`(ignore 확인).
+  - **다음: 착수 ②** — `runAgentic` + claude-code `stream-json` 멀티턴 + hi-fi 빌드 agentic화(shoot=**툴**로 재사용, 오늘 만든 스크립트의 두 번째 용처) + npx 부트스트랩. 상세 [[kiln-c2-agentic]].
 
 ---
 
