@@ -3,6 +3,7 @@ import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { generate } from '../../model/generate.js';
 import { buildRevised } from '../build-screens.js';
+import { verifyScreens } from '../verify.js';
 import { handoffStage } from './handoff.js';
 import { mapTraceability } from '../traceability.js';
 import { noteStatus } from '../project.js';
@@ -119,6 +120,7 @@ export async function reviseStage(ctx, { feedback, emit, model = 'claude-code', 
   const targetFiles = unique(plan.scope?.tokens ? intended : [...added, ...named]);
 
   const contract = { name: ctx.name, prd, flow, tokens };
+  const rebuilt = []; // { path, html } for screens actually rewritten this revision — verify input
   if (targetFiles.length) {
     emit('step', { msg: `화면 재생성: ${targetFiles.join(', ')}` });
     await mkdir(join(ctx.dir, 'screens'), { recursive: true });
@@ -156,7 +158,31 @@ export async function reviseStage(ctx, { feedback, emit, model = 'claude-code', 
       await writeFile(join(ctx.dir, 'screens', file), html);
       emit('artifact', { path: `projects/${ctx.name}/screens/${file}`, kind: 'screen' });
       changed.push(`screens/${file}`);
+      rebuilt.push({ path: `screens/${file}`, html });
     }
+  }
+
+  // Step 3b — render + pixel-verify the revised screens (C2 착수 ③ · revise 확산). A revision gets
+  // the same render-in-loop safety the initial build has: render the current screen set (shoot
+  // globs them all), then adversarially pixel-verify just the screens THIS revision changed. Same
+  // shared verifier as design.js — advisory, never blocks the chat turn.
+  if (rebuilt.length) {
+    emit('step', { msg: `렌더 게이트(shoot) — 개정 화면 ${rebuilt.length}개` });
+    const shot = await runGate('shoot.cjs', ctx.name);
+    emit('gate', { name: 'render-shoot', ok: shot.ok, summary: gateSummary(shot.output) });
+    if (!shot.ok) {
+      emit('warn', {
+        msg: '렌더 게이트 blank 감지 — 아래 리포트 확인(개정 계속)\n' +
+          shot.output.split('\n').filter((l) => l.includes('❌')).join('\n'),
+      });
+    }
+    for (const f of rebuilt) {
+      const shotRel = `_shots/${f.path.replace(/\.html$/i, '.png')}`;
+      if (existsSync(join(ctx.dir, shotRel))) {
+        emit('artifact', { path: `projects/${ctx.name}/${shotRel}`, kind: 'shot' });
+      }
+    }
+    await verifyScreens({ ctx, files: rebuilt, contract, judge: planner, emit, scope: '(개정)' });
   }
 
   // Step 4 — refresh PRD↔screen traceability over the current full screen set.
