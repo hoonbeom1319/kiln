@@ -41,6 +41,28 @@ export async function designStage(ctx, { emit, model = 'claude-code', judge = 'c
     emit('artifact', { path: `projects/${ctx.name}/${f.path}`, kind: 'screen' });
   }
 
+  // Deterministic blank-screen guard — separate from the subjective design-verifier below.
+  // Catches the failure mode behind "완료인데 흰 화면": the agent returns empty/near-empty
+  // shells or a refusal, yet the run finishes "done". A fully-blank build fails hard here so the
+  // user sees a clear error instead of a white gallery; a partial blank warns + shows a red chip.
+  const blanks = build.files.filter((f) => isBlankScreen(f.html));
+  emit('gate', {
+    name: 'screens-nonblank',
+    ok: blanks.length === 0,
+    summary:
+      blanks.length === 0
+        ? `전 화면 내용 있음 (${build.files.length}개)`
+        : `빈 화면 ${blanks.length}/${build.files.length}: ${blanks.map(fileBase).join(', ')}`,
+  });
+  if (blanks.length === build.files.length) {
+    throw new Error(
+      `생성된 화면 ${build.files.length}개가 모두 비어 있습니다 — 로컬 에이전트가 화면 HTML을 제대로 만들지 못했습니다. 다시 시도하거나 다른 에이전트/모델을 선택해 주세요.`,
+    );
+  }
+  if (blanks.length) {
+    emit('warn', { msg: `빈 화면 감지: ${blanks.map(fileBase).join(', ')} — 재생성을 권장합니다` });
+  }
+
   emit('step', { msg: `독립 검증(design-verifier) — 화면 ${build.files.length}개` });
   const judged = await judgeHiFi({ model: judge, fixture: contract, files: build.files });
   emit('model', { stage: 'verify', model: judged.judgeModel, usage: judged.usage, attempts: judged.attempts });
@@ -71,6 +93,27 @@ function reconcile(verdict, files) {
   const screens = (verdict.screens || []).filter((s) => built.has(norm(s.screen)));
   const result = screens.length && screens.every((s) => s.verdict === 'PASS') ? 'PASS' : 'FAIL';
   return { ...verdict, screens, result };
+}
+
+function fileBase(f) {
+  return f.path.split('/').pop();
+}
+
+// A hi-fi screen has real body content — dozens of elements and real copy. Trip only on a
+// genuinely empty/near-empty shell (agent refusal or truncated output), never a legit screen,
+// so this can gate the run without false-failing good builds. (Calibrated against the packaged
+// example screens: ~50+ body elements, hundreds of visible chars each.)
+function isBlankScreen(html) {
+  const m = String(html).match(/<body[^>]*>([\s\S]*?)<\/body>/i);
+  const body = m ? m[1] : String(html);
+  const elements = (body.match(/<[a-zA-Z]/g) || []).length;
+  const text = body
+    .replace(/<(script|style)[\s\S]*?<\/\1>/gi, '')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/&[a-z#0-9]+;/gi, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+  return elements < 8 || text.length < 30;
 }
 
 function stripFence(text) {

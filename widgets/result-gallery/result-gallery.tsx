@@ -1,7 +1,13 @@
 'use client';
 
 import { useState } from 'react';
-import { artifactUrl, useTraceability, type KilnEvent, type TraceScreen } from '@/entities/job';
+import {
+  artifactUrl,
+  handoffZipUrl,
+  useTraceability,
+  type KilnEvent,
+  type TraceScreen,
+} from '@/entities/job';
 import { Panel, ScaledFrame } from '@/shared/ui';
 import { cn } from '@/shared/lib';
 
@@ -31,7 +37,11 @@ export function ResultGallery({ name, events, refreshKey = 0 }: ResultGalleryPro
   const activeIdx = Math.min(selected, Math.max(0, screens.length - 1));
   const active = screens[activeIdx];
 
-  const screenUrl = (s: TraceScreen) => artifactUrl(`${name}/handoff/screens/${s.file}`) + bust;
+  // Preview the LIVE screens (projects/<name>/screens/), not the derived handoff/screens/ copy.
+  // The screen HTML is self-contained (tokens inlined), so it renders standalone — and reading the
+  // source directly means the gallery no longer breaks when the pack-handoff step fails to produce
+  // handoff/screens/ (that copy is only needed for the downloadable handoff package).
+  const screenUrl = (s: TraceScreen) => artifactUrl(`${name}/screens/${s.file}`) + bust;
 
   return (
     <Panel className="flex flex-col overflow-hidden">
@@ -75,6 +85,14 @@ export function ResultGallery({ name, events, refreshKey = 0 }: ResultGalleryPro
             className="text-xs font-medium text-accent hover:text-accent-hover hover:underline"
           >
             handoff ↗
+          </a>
+          {/* Download the whole handoff/ folder as a zip — the package to hand to a coding agent,
+              without digging into projects/<name>/handoff/ by hand. */}
+          <a
+            href={handoffZipUrl(name)}
+            className="rounded-md border border-border px-2 py-1 text-xs font-medium text-text hover:border-accent hover:text-accent"
+          >
+            ⬇ handoff .zip
           </a>
         </div>
       </header>

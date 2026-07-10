@@ -19,6 +19,7 @@ export {
   startRollback,
   jobStreamUrl,
   artifactUrl,
+  handoffZipUrl,
   fetchTraceability,
   fetchRevisions,
 } from './api';

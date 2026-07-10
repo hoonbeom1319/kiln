@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { reviseMutationOptions } from '@/entities/job';
 import { ChatInput } from './ui/chat-input';
@@ -18,12 +18,38 @@ interface ReviseChatProps {
 // mutation, hands the started job id upward. Thin — ChatInput is the presentation. Chat scope is
 // the whole project (not a single screen) so a revision keeps cross-screen coherence.
 export function ReviseChat({ name, onStarted, agent, disabled }: ReviseChatProps) {
+  const draftKey = `kiln:revise-draft:${name}`;
   const [feedback, setFeedback] = useState('');
+
+  // Restore a draft typed before a refresh (per project) so a reload doesn't lose it. Client-only.
+  // Restore only reads — it never writes, so it can't wipe the saved draft (persistence happens on
+  // edit via updateFeedback below, not in an effect that would fire with the initial empty value).
+  useEffect(() => {
+    try {
+      setFeedback(localStorage.getItem(draftKey) ?? '');
+    } catch {
+      /* storage unavailable */
+    }
+  }, [draftKey]);
+
+  // Write-through on every edit: keep localStorage in step with the box, clearing it when empty.
+  const updateFeedback = useCallback(
+    (v: string) => {
+      setFeedback(v);
+      try {
+        if (v) localStorage.setItem(draftKey, v);
+        else localStorage.removeItem(draftKey);
+      } catch {
+        /* storage unavailable */
+      }
+    },
+    [draftKey],
+  );
 
   const mutation = useMutation({
     ...reviseMutationOptions(),
     onSuccess: (res) => {
-      setFeedback('');
+      updateFeedback('');
       onStarted(res.id);
     },
   });
@@ -37,7 +63,7 @@ export function ReviseChat({ name, onStarted, agent, disabled }: ReviseChatProps
   return (
     <ChatInput
       value={feedback}
-      onChange={setFeedback}
+      onChange={updateFeedback}
       onSubmit={submit}
       pending={mutation.isPending || Boolean(disabled)}
       error={mutation.error?.message ?? null}

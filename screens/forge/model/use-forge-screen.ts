@@ -6,6 +6,10 @@ import { useJobStream, type JobStream } from '@/entities/job';
 
 type ActiveKind = 'forge' | 'revise' | null;
 
+// sessionStorage key for the in-flight job, so a refresh re-attaches to the run instead of
+// dropping to idle (the run itself lives in the server process; the SSE stream replays it).
+const ACTIVE_JOB_KEY = 'kiln:active-job';
+
 export interface ForgeScreenModel {
   jobId: string | null;
   stream: JobStream;
@@ -46,6 +50,37 @@ export function useForgeScreen(): ForgeScreenModel {
     }
   }, []);
 
+  // Re-attach to an in-flight job after a browser refresh. The forge/revise runs in the server
+  // process (not tied to this page), and its SSE stream replays buffered events — so restoring
+  // the saved id brings the live progress back instead of the run silently vanishing from view.
+  useEffect(() => {
+    try {
+      const raw = sessionStorage.getItem(ACTIVE_JOB_KEY);
+      if (!raw) return;
+      const saved = JSON.parse(raw) as { jobId?: string; activeKind?: ActiveKind };
+      if (saved.jobId) {
+        setJobId(saved.jobId);
+        setActiveKind(saved.activeKind ?? 'forge');
+      }
+    } catch {
+      /* ignore malformed */
+    }
+  }, []);
+
+  // Keep the active id across refreshes only while it's running; drop it once terminal so a
+  // stale/finished (or server-restart-gone) job never re-attaches on the next load.
+  useEffect(() => {
+    try {
+      if (jobId && stream.status === 'running') {
+        sessionStorage.setItem(ACTIVE_JOB_KEY, JSON.stringify({ jobId, activeKind }));
+      } else {
+        sessionStorage.removeItem(ACTIVE_JOB_KEY);
+      }
+    } catch {
+      /* storage unavailable */
+    }
+  }, [jobId, activeKind, stream.status]);
+
   // React to a job finishing exactly once (guarded by jobId). A forge opens the gallery; a
   // revise/rollback refreshes the already-open gallery.
   useEffect(() => {
@@ -53,6 +88,15 @@ export function useForgeScreen(): ForgeScreenModel {
     handledDone.current = jobId;
     if (activeKind === 'forge' && stream.doneName) {
       setGalleryName(stream.doneName);
+      // Reflect the finished project in the URL (no navigation) so a later refresh reopens its
+      // gallery via the ?project mount effect above — the same path as reopening from the list.
+      try {
+        const url = new URL(window.location.href);
+        url.searchParams.set('project', stream.doneName);
+        window.history.replaceState(null, '', url.toString());
+      } catch {
+        /* history unavailable */
+      }
     } else if (activeKind === 'revise' && galleryName) {
       queryClient.invalidateQueries({ queryKey: ['traceability', galleryName] });
       queryClient.invalidateQueries({ queryKey: ['revisions', galleryName] });

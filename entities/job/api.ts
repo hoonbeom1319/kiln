@@ -33,6 +33,11 @@ export function artifactUrl(relPath: string): string {
   return `/api/projects/${relPath.split('/').map(encodeURIComponent).join('/')}`;
 }
 
+// URL to download a finished project's whole handoff/ folder as a zip.
+export function handoffZipUrl(name: string): string {
+  return `/api/handoff/${encodeURIComponent(name)}`;
+}
+
 // Fetch the PRD ↔ screen map for a finished project. Returns null if absent (older projects
 // forged before traceability existed) so the gallery can fall back gracefully.
 export async function fetchTraceability(name: string): Promise<Traceability | null> {

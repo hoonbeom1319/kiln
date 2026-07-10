@@ -1,16 +1,24 @@
 import { spawn } from 'node:child_process';
 import { resolve } from 'node:path';
+import { PROJECTS_ROOT } from './project.js';
 
 // Run one of the copied atelier gate scripts (scripts/*.cjs) as a child process.
-// They resolve `projects/<name>/` from their own repo root (kiln), so a project
-// scaffolded under kiln/projects/ is exactly what they inspect. Pure Node, no deps.
+// The scripts re-derive `projects/<name>/` on their own (env or repo-relative); we pin
+// KILN_PROJECTS_ROOT to the SERVER's resolved PROJECTS_ROOT so the gate always inspects the
+// exact directory the pipeline wrote to. Without this, a gate whose cwd/repo-root differs from
+// the server's (e.g. the packaged launcher spawns the server from the package dir) resolves a
+// different projects root, fails to find the project, and exits non-zero — which is what left
+// handoff/ unpacked and the gallery blank. Pure Node, no deps.
 //
 // Returns { ok, output } — ok is exit-code 0. Never throws on gate failure; the caller
 // decides whether a failing gate blocks (PRD) or is advisory (handoff).
 export function runGate(scriptCjs, project, { cwd = process.cwd() } = {}) {
   const scriptPath = resolve(cwd, 'scripts', scriptCjs);
   return new Promise((res) => {
-    const child = spawn(process.execPath, [scriptPath, project], { cwd });
+    const child = spawn(process.execPath, [scriptPath, project], {
+      cwd,
+      env: { ...process.env, KILN_PROJECTS_ROOT: PROJECTS_ROOT },
+    });
     let out = '';
     child.stdout.on('data', (d) => (out += d));
     child.stderr.on('data', (d) => (out += d));
