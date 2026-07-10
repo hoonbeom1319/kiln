@@ -43,16 +43,19 @@ export function ForgeScreen() {
         }
       />
 
-      <main className="w-full px-4 py-8 sm:px-6 lg:py-10">
+      <main className="w-full px-4 py-8 sm:px-6 lg:px-8 lg:py-10 xl:px-12">
         {inGallery ? (
-          <div className="mx-auto grid max-w-7xl items-start gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(320px,360px)]">
+          <div className="grid w-full items-start gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(320px,360px)]">
             <ResultGallery
               name={m.galleryName as string}
               events={m.stream.events}
               refreshKey={m.refreshKey}
             />
 
-            <Panel as="aside" className="flex flex-col gap-4 p-4 lg:sticky lg:top-20">
+            <Panel
+              as="aside"
+              className="mx-auto flex w-full max-w-2xl flex-col gap-4 p-4 lg:mx-0 lg:max-w-none lg:sticky lg:top-20"
+            >
               {/* Stack the title over the picker: the aside is ~360px, too narrow to sit the
                   two-select picker beside the heading without both wrapping mid-word. */}
               <div className="flex flex-col gap-2">
@@ -84,11 +87,13 @@ export function ForgeScreen() {
             </Panel>
           </div>
         ) : isIdle ? (
-          // Idle launchpad: centred input, then the past-projects grid.
-          <div className="mx-auto flex max-w-5xl flex-col gap-10">
-            <section className="mx-auto flex w-full max-w-2xl flex-col gap-5 pt-4 text-center">
-              <div className="flex flex-col gap-2">
-                <h2 className="text-balance text-2xl font-semibold tracking-tight sm:text-3xl">
+          // Idle launchpad: full-width. On mobile the hero stacks over the input; from lg it
+          // splits into two columns (copy left, input right) so wide screens use the width via a
+          // breakpoint instead of a capped, centred column. Past-projects grid below.
+          <div className="flex w-full flex-col gap-10">
+            <section className="grid w-full gap-6 pt-4 lg:grid-cols-2 lg:items-center lg:gap-10 lg:pt-6">
+              <div className="flex flex-col gap-2 text-center lg:text-left">
+                <h2 className="text-balance text-2xl font-semibold tracking-tight sm:text-3xl lg:text-4xl">
                   한 줄 아이디어를 넣으면, 구운 패키지가 나옵니다
                 </h2>
                 <p className="text-pretty text-sm text-muted">
@@ -105,7 +110,7 @@ export function ForgeScreen() {
           </div>
         ) : (
           // Forging: idea/input on the left, the live kiln on the right.
-          <div className="mx-auto grid max-w-6xl items-start gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
+          <div className="grid w-full items-start gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
             <Panel className="p-5">
               <ForgeRun onStarted={m.startForge} agent={m.agent} disabled={running} />
             </Panel>
@@ -127,7 +132,7 @@ export function ForgeScreen() {
 function TopBar({ right }: { right: React.ReactNode }) {
   return (
     <header className="sticky top-0 z-10 border-b border-border bg-canvas/85 backdrop-blur">
-      <div className="mx-auto flex w-full max-w-7xl items-center gap-3 px-4 py-3 sm:px-6">
+      <div className="flex w-full flex-wrap items-center gap-x-3 gap-y-2 px-4 py-3 sm:px-6 lg:px-8 xl:px-12">
         <a href="/" className="flex items-center gap-2.5">
           <EmberMark />
           <span className="flex items-baseline gap-2">

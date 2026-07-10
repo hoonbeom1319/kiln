@@ -10,6 +10,12 @@ interface ScaledFrameProps {
   // container. Rendering at a real desktop width and shrinking = a faithful thumbnail with no
   // internal scrollbar (the wireframe-era problem was cramming full pages into a short iframe).
   virtualWidth?: number;
+  // A fixed virtual viewport height. REQUIRED for app-frame artifacts that lay out with
+  // `min-height:100vh` (their scrollHeight equals whatever height we give the iframe, so
+  // auto-measuring is circular and collapses to the provisional height). Giving a real phone
+  // height (e.g. 480×1040) renders the screen at its intended viewport instead of a cramped box.
+  // When set, measurement is skipped.
+  virtualHeight?: number;
   // If set, clip the preview to this pixel height (a thumbnail shows the top of the screen).
   // If omitted, the wrapper grows to the whole scaled page — no inner scroll anywhere.
   maxHeight?: number;
@@ -26,6 +32,7 @@ export function ScaledFrame({
   src,
   title,
   virtualWidth = 1280,
+  virtualHeight,
   maxHeight,
   interactive = false,
   className,
@@ -33,7 +40,8 @@ export function ScaledFrame({
   const containerRef = useRef<HTMLDivElement>(null);
   const frameRef = useRef<HTMLIFrameElement>(null);
   const [scale, setScale] = useState(0);
-  const [contentHeight, setContentHeight] = useState(Math.round(virtualWidth * 0.66)); // provisional 3:2
+  // Fixed viewport (virtualHeight) wins; otherwise a provisional 3:2 until onLoad measures.
+  const [contentHeight, setContentHeight] = useState(virtualHeight ?? Math.round(virtualWidth * 0.66));
 
   // scale = container width / virtual width; re-measure on container resize.
   useEffect(() => {
@@ -46,10 +54,28 @@ export function ScaledFrame({
     return () => ro.disconnect();
   }, [virtualWidth]);
 
-  // On load, read the same-origin scrollHeight so the wrapper matches the whole page.
   const handleLoad = () => {
+    const doc = frameRef.current?.contentDocument;
+    // In non-interactive previews, hide the artifact's own scrollbars. App-frame mockups keep a
+    // fixed header/footer around an internal overflow-y:auto region; with pointer-events off its
+    // scrollbar is a dead, ugly bar. Same-origin, so inject a style to suppress it — the preview
+    // reads as a clean phone snapshot; "open large" gives the full, scrollable screen.
+    if (!interactive && doc) {
+      try {
+        const s = doc.createElement('style');
+        s.textContent =
+          '*::-webkit-scrollbar{width:0!important;height:0!important;display:none!important}' +
+          '*{scrollbar-width:none!important;-ms-overflow-style:none!important}';
+        doc.head.appendChild(s);
+      } catch {
+        /* cross-origin: nothing to hide */
+      }
+    }
+    // Read the same-origin scrollHeight so the wrapper matches the whole page. Skipped for a fixed
+    // virtualHeight (100vh app frames can't be measured — scrollHeight just echoes it back).
+    if (virtualHeight) return;
     try {
-      const h = frameRef.current?.contentDocument?.documentElement?.scrollHeight;
+      const h = doc?.documentElement?.scrollHeight;
       if (h) setContentHeight(h);
     } catch {
       /* cross-origin fallback: keep the provisional height */

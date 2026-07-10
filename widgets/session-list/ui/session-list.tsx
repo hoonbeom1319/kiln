@@ -29,7 +29,7 @@ export function SessionList() {
       <h2 className="px-1 text-sm font-semibold text-muted">
         이전 프로젝트 <span className="text-muted/60">· {sessions.length}</span>
       </h2>
-      <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {sessions.map((s) => (
           <li key={s.name}>
             <a

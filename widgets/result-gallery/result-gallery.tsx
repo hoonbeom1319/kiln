@@ -90,9 +90,10 @@ export function ResultGallery({ name, events, refreshKey = 0 }: ResultGalleryPro
             }}
           />
         ) : (
-          <div className="flex flex-col lg:grid lg:grid-cols-[minmax(180px,220px)_1fr]">
-            {/* Rail: horizontal filmstrip on mobile, vertical list on desktop. */}
-            <nav className="flex gap-2 overflow-x-auto border-b border-border p-3 lg:flex-col lg:overflow-y-auto lg:border-b-0 lg:border-r">
+          <div className="flex flex-col md:grid md:grid-cols-[minmax(180px,220px)_1fr]">
+            {/* Rail: horizontal filmstrip on mobile, vertical list from tablet up. No inner
+                vertical scroll — the rail flows in the single page scroll. */}
+            <nav className="flex gap-2 overflow-x-auto border-b border-border p-3 md:flex-col md:overflow-x-visible md:border-b-0 md:border-r">
               {screens.map((s, i) => (
                 <Thumb
                   key={s.file}
@@ -121,8 +122,17 @@ export function ResultGallery({ name, events, refreshKey = 0 }: ResultGalleryPro
                       크게 열기 ↗
                     </a>
                   </div>
-                  <div className="max-h-[72vh] overflow-y-auto rounded-lg border border-border">
-                    <ScaledFrame src={screenUrl(active)} title={active.title || active.file} />
+                  {/* Render at a real phone viewport (480×1040): the artifacts are min-height:100vh
+                      app frames, so this shows the screen at its intended size instead of a cramped
+                      box with its own inner scroll. No wrapper max-height/overflow — the fixed-height
+                      preview flows in the single page scroll (no scroll-within-scroll). */}
+                  <div className="w-full max-w-[480px] overflow-hidden rounded-lg border border-border">
+                    <ScaledFrame
+                      src={screenUrl(active)}
+                      title={active.title || active.file}
+                      virtualWidth={480}
+                      virtualHeight={1040}
+                    />
                   </div>
                   <p className="flex gap-2 text-[13px] leading-snug text-muted">
                     <span className="mt-px shrink-0 rounded bg-surface-2 px-1.5 py-0.5 text-[11px] font-medium text-text">
@@ -192,11 +202,11 @@ function Thumb({
       onClick={onClick}
       title={screen.title || screen.file}
       className={cn(
-        'group flex w-40 shrink-0 flex-col overflow-hidden rounded-lg border text-left transition-colors lg:w-full',
+        'group flex w-40 shrink-0 flex-col overflow-hidden rounded-lg border text-left transition-colors md:w-full',
         active ? 'border-accent ring-1 ring-accent' : 'border-border hover:border-accent/60',
       )}
     >
-      <ScaledFrame src={url} title={screen.title || screen.file} maxHeight={110} />
+      <ScaledFrame src={url} title={screen.title || screen.file} virtualWidth={480} maxHeight={110} />
       <span
         className={cn(
           'truncate border-t border-border px-2 py-1.5 text-xs font-medium',
@@ -227,7 +237,7 @@ function OverviewGrid({
           onClick={() => onOpen(i)}
           className="group m-0 flex flex-col overflow-hidden rounded-lg border border-border text-left transition-colors hover:border-accent"
         >
-          <ScaledFrame src={urlFor(s)} title={s.title || s.file} maxHeight={200} />
+          <ScaledFrame src={urlFor(s)} title={s.title || s.file} virtualWidth={480} maxHeight={200} />
           <div className="flex flex-col gap-1 border-t border-border p-3">
             <span className="text-sm font-semibold group-hover:text-accent">{s.title || s.file}</span>
             <span className="line-clamp-2 text-[13px] leading-snug text-muted">{s.reflects}</span>

@@ -55,7 +55,7 @@ export function AgentPicker({ value, onChange, disabled }: AgentPickerProps) {
 
   return (
     <div className="flex flex-wrap items-center gap-2 text-xs text-muted">
-      <span className="whitespace-nowrap">실행 모델</span>
+      <span className="hidden whitespace-nowrap sm:inline">실행 모델</span>
       <select
         aria-label="실행 에이전트"
         value={agentAlias}

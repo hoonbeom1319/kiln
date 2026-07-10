@@ -65,6 +65,12 @@ body {
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+  /* Korean line-breaking: keep-all breaks only at spaces/word boundaries (an eojeol stays intact)
+   * instead of the CJK default of breaking between any two syllables. overflow-wrap is the safety
+   * partner so long unbreakable Latin tokens (project ids, model slugs) still wrap instead of
+   * overflowing their container. */
+  word-break: keep-all;
+  overflow-wrap: break-word;
 }
 
 * {
