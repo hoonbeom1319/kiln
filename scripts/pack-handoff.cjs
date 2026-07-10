@@ -19,8 +19,12 @@ if (!project || project.startsWith('-')) {
   console.error('사용법: node scripts/pack-handoff.js <project>');
   process.exit(1);
 }
-const ROOT = path.resolve(__dirname, '..');
-const PROJ = path.join(ROOT, 'projects', project);
+// Honor KILN_PROJECTS_ROOT (set by the packaged launcher) so a gate spawned from the installed
+// package still operates on the user's projects/, not the package's own. Falls back to repo-relative.
+const PROJECTS_ROOT = process.env.KILN_PROJECTS_ROOT
+  ? path.resolve(process.env.KILN_PROJECTS_ROOT)
+  : path.join(path.resolve(__dirname, '..'), 'projects');
+const PROJ = path.join(PROJECTS_ROOT, project);
 const HO = path.join(PROJ, 'handoff');
 if (!fs.existsSync(PROJ)) { console.error(`프로젝트 없음: ${PROJ}`); process.exit(1); }
 if (!fs.existsSync(HO)) { fs.mkdirSync(HO, { recursive: true }); }

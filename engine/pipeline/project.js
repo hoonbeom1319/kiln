@@ -2,7 +2,13 @@ import { mkdir, writeFile, readFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 
-export const PROJECTS_ROOT = resolve(process.cwd(), 'projects');
+// Where projects are read/written. Defaults to ./projects under the process cwd (dev + the bin
+// CLIs run from the repo). When Kiln is installed and launched as a package, the web server runs
+// with cwd = the package dir, so the launcher sets KILN_PROJECTS_ROOT to the user's own directory —
+// decoupling "where the app code lives" from "where the user's data goes".
+export const PROJECTS_ROOT = process.env.KILN_PROJECTS_ROOT
+  ? resolve(process.env.KILN_PROJECTS_ROOT)
+  : resolve(process.cwd(), 'projects');
 
 // Derive a filesystem-safe slug. ASCII words from the idea if any; otherwise (e.g. a
 // Korean idea) fall back to a timestamped name so runs never collide. A caller-provided

@@ -18,3 +18,6 @@ tsconfig.tsbuildinfo
 
 # Playwright MCP output
 .playwright-mcp/
+
+# npm pack artifact
+*.tgz

@@ -19,8 +19,12 @@ if (!project || project.startsWith('-')) {
   console.error('사용법: node scripts/lint-prd.js <project>');
   process.exit(1);
 }
-const ROOT = path.resolve(__dirname, '..');
-const PRD_PATH = path.join(ROOT, 'projects', project, 'PRD.md');
+// Honor KILN_PROJECTS_ROOT (set by the packaged launcher) so a gate spawned from the installed
+// package still reads the user's projects/, not the package's own. Falls back to repo-relative.
+const PROJECTS_ROOT = process.env.KILN_PROJECTS_ROOT
+  ? path.resolve(process.env.KILN_PROJECTS_ROOT)
+  : path.join(path.resolve(__dirname, '..'), 'projects');
+const PRD_PATH = path.join(PROJECTS_ROOT, project, 'PRD.md');
 if (!fs.existsSync(PRD_PATH)) { console.error(`PRD 없음: ${PRD_PATH}`); process.exit(1); }
 
 const md = fs.readFileSync(PRD_PATH, 'utf8');

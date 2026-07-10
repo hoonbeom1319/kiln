@@ -17,6 +17,28 @@
 
 ---
 
+## 🚀 설치 · 실행
+
+```bash
+npx @hb-kit/kiln           # 브라우저 워크숍이 열린다 (기본 http://localhost:5000)
+```
+
+또는 전역 설치:
+
+```bash
+npm i -g @hb-kit/kiln
+kiln                        # 어느 폴더에서든 실행
+kiln --port 4000 --no-open  # 포트 지정 · 브라우저 자동 열기 끄기
+```
+
+- **결과물은 실행한 디렉터리의 `./projects/`** 에 쌓인다 — 원하는 작업 폴더에서 실행하면 된다.
+- **생성은 당신의 로컬 에이전트**(`claude` 또는 `codex` CLI)로 돌아간다. PATH에 하나라도 있으면 화면에서 감지된다. 없으면 안내가 뜬다 — 운영자 비용 0인 이유.
+- 요구사항: **Node ≥ 18**, 그리고 로컬 에이전트 CLI 최소 1개.
+
+> 패키지는 self-contained standalone 빌드다 — 설치 시 Next/React 트리를 따로 받지 않는다.
+
+---
+
 ## ✨ 핵심 한 장
 
 <table>
