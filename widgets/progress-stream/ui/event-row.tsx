@@ -22,6 +22,15 @@ export function EventRow({ ev }: { ev: KilnEvent }) {
           {ev.summary ? <span className="text-muted"> — {ev.summary}</span> : null}
         </li>
       );
+    case 'turn':
+      return <li className="pl-6 text-xs text-muted/80">◇ {ev.text}</li>;
+    case 'tool-call':
+      return (
+        <li className={cn('pl-6 font-mono text-xs', ev.ok === false ? 'text-danger' : 'text-muted/80')}>
+          {ev.ok === false ? '✗' : '↳'} {ev.tool}
+          {ev.summary ? <span className="text-muted"> {ev.summary}</span> : null}
+        </li>
+      );
     case 'artifact':
       return <li className="pl-6 font-mono text-xs text-accent">→ {ev.path}</li>;
     case 'revision':

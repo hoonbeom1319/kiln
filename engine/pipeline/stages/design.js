@@ -2,7 +2,8 @@ import { mkdir, writeFile, readFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { generate } from '../../model/generate.js';
-import { buildScreens } from '../build-screens.js';
+import { isAgentic } from '../../model/agentic.js';
+import { buildScreens, buildScreensAgentic } from '../build-screens.js';
 import { judgeHiFi } from '../../harness/judge.js';
 import { runGate, gateSummary } from '../gates.js';
 import { noteStatus } from '../project.js';
@@ -32,9 +33,17 @@ export async function designStage(ctx, { emit, model = 'claude-code', judge = 'c
   await writeFile(join(ctx.dir, '00-flow.md'), flow);
   emit('artifact', { path: `projects/${ctx.name}/00-flow.md` });
 
-  emit('step', { msg: '하이파이 화면 빌드' });
+  // Agentic-first, one-shot fallback (DECISIONS: C2 착수 ②). When the selected agent supports a
+  // tool loop (claude-code), the agent builds screens and self-corrects them against the real
+  // render (shoot as a Bash tool) — atelier's render-in-loop. Otherwise fall back to the one-shot
+  // builder + the engine's external shoot gate below (codex/echo/hosted). Both return { files },
+  // so everything downstream (blank guard, gate, verifier, traceability) is identical.
   const contract = { name: ctx.name, prd, flow, tokens };
-  const build = await buildScreens({ model, contract });
+  const agentic = isAgentic(model);
+  emit('step', { msg: agentic ? '하이파이 화면 빌드 (렌더-인-루프 자가수정)' : '하이파이 화면 빌드' });
+  const build = agentic
+    ? await buildScreensAgentic({ model, contract, ctx, emit })
+    : await buildScreens({ model, contract });
   emit('model', { stage: 'hi-fi', model: build.model, usage: build.usage, attempts: build.attempts });
   for (const f of build.files) {
     const dest = join(ctx.dir, f.path);

@@ -12,6 +12,10 @@ export class Provider {
     // responseSchema, Claude forced tool-use). When false, generate() falls back to
     // "ask for JSON + extract" and still validates + repair-retries.
     this.supportsStructured = false;
+    // Set true when the provider can run a multi-turn agentic tool loop (write files, run a
+    // renderer, self-correct) instead of a single completion. When false, runAgentic() (agentic.js)
+    // is unavailable and the caller falls back to the one-shot generate() + an external gate.
+    this.supportsAgentic = false;
   }
 
   // Free-form text. Must return { text, usage:{input,output}, raw }.
@@ -23,6 +27,14 @@ export class Provider {
   // Only called when supportsStructured is true.
   async generateStructured(_req) {
     throw new Error(`${this.name}.generateStructured() not implemented`);
+  }
+
+  // Multi-turn agentic tool loop. The agent works against real files (writes screens, runs the
+  // render gate, reads the PNGs, self-corrects) rather than returning text. Reports progress via
+  // req.onEvent(kind, data) — the engine maps those to turn/tool-call SSE sub-events. Must return
+  // { turns, usage:{input,output}, result }. Only called when supportsAgentic is true.
+  async runAgentic(_req) {
+    throw new Error(`${this.name}.runAgentic() not implemented`);
   }
 }
 

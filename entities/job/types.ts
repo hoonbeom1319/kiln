@@ -20,6 +20,8 @@ export type KilnEvent =
       attempts?: number;
     })
   | (KilnEventBase & { type: 'gate'; name: string; ok: boolean; summary?: string })
+  | (KilnEventBase & { type: 'turn'; text: string })
+  | (KilnEventBase & { type: 'tool-call'; tool: string; summary?: string; ok?: boolean; detail?: string })
   | (KilnEventBase & { type: 'artifact'; path: string; kind?: string })
   | (KilnEventBase & { type: 'warn'; msg: string })
   | (KilnEventBase & {

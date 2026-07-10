@@ -17,6 +17,7 @@
 // exit 1: 렌더된 blank 화면 발견(하드 실패). exit 0: 전 화면 정상 / 브라우저 미설치로 스킵(advisory).
 const fs = require('fs');
 const path = require('path');
+const { ensureChromium } = require('./ensure-chromium.cjs');
 
 const project = process.argv[2];
 const vp = process.argv[3] || '1280x900';
@@ -69,6 +70,9 @@ function collectMetrics() {
 }
 
 async function main() {
+  // Bootstrap: download the pinned Chromium on the first render that needs it (idempotent; reused
+  // forever after). Runs before loadChromium so the very first render works with no manual setup.
+  ensureChromium();
   const chromium = loadChromium();
   if (!chromium) {
     report({ skipped: '크로미움 미설치 — `npx playwright install chromium` 후 렌더 게이트가 켜집니다(그때까지 스킵).' });
